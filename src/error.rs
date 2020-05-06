@@ -9,6 +9,7 @@ pub enum ErrorKind {
     CovarianceNotPositiveSemiDefinite,
 }
 
+#[cfg(feature="std")]
 impl std::fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         use ErrorKind::*;
@@ -25,7 +26,9 @@ impl From<ErrorKind> for KalmanError {
     }
 }
 
+#[cfg(feature="std")]
 impl std::error::Error for KalmanError {}
+#[cfg(feature="std")]
 impl std::fmt::Display for KalmanError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "Kalman Filter Error: {}", self.kind)

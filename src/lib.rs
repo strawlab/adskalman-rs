@@ -1,3 +1,5 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
 // Ideas for improvement:
 //  - See http://mocha-java.uccs.edu/ECE5550/, especially
 //    "5.1: Maintaining symmetry of covariance matrices".
@@ -5,18 +7,27 @@
 //  - See https://stats.stackexchange.com/questions/67262/non-overlapping-state-and-measurement-covariances-in-kalman-filter/292690
 //  - https://en.wikipedia.org/wiki/Kalman_filter#Square_root_form
 
+#[cfg(feature="std")]
 use log::trace;
+#[cfg(feature="std")]
 use pretty_print_nalgebra::pretty_print;
 #[cfg(debug_assertions)]
 use approx::assert_relative_eq;
 use nalgebra as na;
-use na::core::{VectorN, MatrixN, MatrixMN};
-use na::core::dimension::DimMin;
+use na::{VectorN, MatrixN, MatrixMN};
+use nalgebra::base::dimension::DimMin;
 
 use na::{DefaultAllocator, DimName, RealField};
 use na::allocator::Allocator;
 
 use num_traits::identities::One;
+
+// Without std, create a dummy trace!() macro.
+#[cfg(not(feature="std"))]
+macro_rules! trace {
+    ($e:expr) => {{}};
+    ($e:expr, $($es:expr),+) => {{}};
+}
 
 /// perform a runtime check that matrix is symmetric
 ///
@@ -37,7 +48,7 @@ pub use error::{KalmanError, ErrorKind};
 mod state_and_covariance;
 pub use state_and_covariance::StateAndCovariance;
 
-pub type Result<T> = std::result::Result<T,KalmanError>;
+pub type Result<T> = core::result::Result<T,KalmanError>;
 
 /// A linear model of process dynamics with no control inputs
 pub trait TransitionModelLinearNoControl<R, SS>
@@ -269,17 +280,34 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// observations must be the `dt` specified in the motion model.
     ///
     /// If any observation has a NaN component, it is treated as missing.
+    #[cfg(feature="std")]
     pub fn filter(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Vec<StateAndCovariance<R,SS>> {
-        let mut previous_estimate = initial_estimate.clone();
-        let mut state_estimates = Vec::with_capacity( observations.len() );
 
-        for this_observation in observations.iter() {
+        let mut state_estimates = Vec::with_capacity(observations.len());
+        let empty = StateAndCovariance::new(na::zero(), na::MatrixN::<R,SS>::identity());
+        for _ in 0..observations.len() {
+            state_estimates.push(empty.clone());
+        }
+        self.filter_inplace(initial_estimate, observations, &mut state_estimates);
+        state_estimates
+    }
+
+    /// Kalman filter (operates on in-place data without allocating)
+    ///
+    /// Operates on entire time series in one shot and returns a vector of state
+    /// estimates. To be mathematically correct, the interval between
+    /// observations must be the `dt` specified in the motion model.
+    ///
+    /// If any observation has a NaN component, it is treated as missing.
+    pub fn filter_inplace(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>], state_estimates: &mut [StateAndCovariance<R,SS>]) {
+        let mut previous_estimate = initial_estimate.clone();
+        assert!(state_estimates.len() >= observations.len());
+
+        for (this_observation, state_estimate) in observations.iter().zip(state_estimates.iter_mut()) {
             let this_estimate = self.step(&previous_estimate, this_observation);
-            state_estimates.push(this_estimate.clone());
+            *state_estimate = this_estimate.clone();
             previous_estimate = this_estimate;
         }
-
-        state_estimates
     }
 
     /// Rauch-Tung-Striebel (RTS) smoother
@@ -289,6 +317,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// observations must be the `dt` specified in the motion model.
     ///
     /// If any observation has a NaN component, it is treated as missing.
+    #[cfg(feature="std")]
     pub fn smooth(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Vec<StateAndCovariance<R,SS>> {
         let forward_results = self.filter(initial_estimate, observations);
         self.smooth_from_filtered(forward_results)
@@ -299,6 +328,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// Operates on entire time series in one shot and returns a vector of state
     /// estimates. To be mathematically correct, the interval between
     /// observations must be the `dt` specified in the motion model.
+    #[cfg(feature="std")]
     pub fn smooth_from_filtered(&self, mut forward_results: Vec<StateAndCovariance<R,SS>>) -> Vec<StateAndCovariance<R,SS>> {
         forward_results.reverse();
 
@@ -315,6 +345,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
         smoothed_backwards
     }
 
+    #[cfg(feature="std")]
     fn smooth_step(&self, smooth_future: &StateAndCovariance<R,SS>, filt: &StateAndCovariance<R,SS>) -> StateAndCovariance<R,SS> {
         let prior = self.transition_model.predict(filt);
 

@@ -5,13 +5,17 @@ authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
 
 [dependencies]
-nalgebra = "0.21"
-num-traits = "0.2"
-log = { version = "0.4", features = ["release_max_level_debug"] }
-itertools = "0.8"
-pretty-print-nalgebra = {git="https://github.com/strawlab/pretty-print-nalgebra", rev="f57a71ee3f3c61c5bf1344338a1da3c3f44e69db"}
-approx = "0.3"
+nalgebra = {version="0.21", default-features=false}
+num-traits = {version="0.2", default-features=false}
+log = { version = "0.4", optional=true }
+itertools = {version="0.9", default-features=false}
+pretty-print-nalgebra = {git="https://github.com/strawlab/pretty-print-nalgebra", rev="f57a71ee3f3c61c5bf1344338a1da3c3f44e69db", optional=true}
+approx = {version="0.3", default-features=false}
 
 [dev-dependencies]
 nalgebra-rand-mvn = {git="https://github.com/strawlab/nalgebra-rand-mvn", rev="da0e4cfbbde132eee0dabda9d874f88f0a8a56ea"}
 env_logger = "0.7"
+
+[features]
+default = ["std"]
+std = ["log", "pretty-print-nalgebra"]

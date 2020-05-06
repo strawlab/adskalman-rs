@@ -1,5 +1,5 @@
 use nalgebra as na;
-use na::core::{VectorN, MatrixN};
+use na::{VectorN, MatrixN};
 use na::{DefaultAllocator, DimName, RealField};
 use na::allocator::Allocator;
 
