@@ -1,0 +1,17 @@
+[package]
+name = "adskalman"
+version = "0.1.0"
+authors = ["Andrew Straw <strawman@astraw.com>"]
+edition = "2018"
+
+[dependencies]
+nalgebra = "0.20"
+num-traits = "0.2"
+log = { version = "0.4", features = ["release_max_level_debug"] }
+itertools = "0.8"
+pretty-print-nalgebra = {path="../pretty-print-nalgebra"}
+approx = "0.3"
+
+[dev-dependencies]
+nalgebra-rand-mvn = {version = "0.1", path="../nalgebra-rand-mvn"}
+env_logger = "0.7"
