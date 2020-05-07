@@ -1,6 +1,6 @@
 use nalgebra as na;
-use na::core::VectorN;
-use na::core::dimension::{U2, U4};
+use na::VectorN;
+use na::dimension::{U2, U4};
 use na::RealField;
 
 // print to csv --------

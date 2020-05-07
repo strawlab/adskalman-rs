@@ -1,8 +1,8 @@
 use nalgebra as na;
-use na::core::{VectorN, MatrixN, MatrixMN};
-use na::core::dimension::{U2, U4};
+use na::{VectorN, MatrixN, MatrixMN};
+use na::dimension::{U2, U4};
 use na::allocator::Allocator;
-use na::core::dimension::DimMin;
+use na::dimension::DimMin;
 use na::{DefaultAllocator, RealField};
 
 use adskalman::ObservationModelLinear;

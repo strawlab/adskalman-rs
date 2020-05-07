@@ -1,6 +1,6 @@
 use nalgebra as na;
-use na::core::{Vector2, Vector4, VectorN, MatrixN, MatrixMN};
-use na::core::dimension::{U1, U2, U4};
+use na::{Vector2, Vector4, VectorN, MatrixN, MatrixMN};
+use na::dimension::{U1, U2, U4};
 use nalgebra_rand_mvn::rand_mvn;
 
 use adskalman::{ObservationModelLinear, KalmanFilterNoControl};

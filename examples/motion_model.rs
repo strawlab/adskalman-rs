@@ -1,6 +1,6 @@
 use nalgebra as na;
-use na::core::MatrixN;
-use na::core::dimension::{U2, U4};
+use na::MatrixN;
+use na::dimension::{U2, U4};
 use na::allocator::Allocator;
 use na::{DefaultAllocator, RealField};
 
