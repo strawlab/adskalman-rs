@@ -6,10 +6,9 @@ use na::DefaultAllocator;
 use na::allocator::Allocator;
 use na::dimension::DimMin;
 
+use adskalman_examples::motion_model;
 use adskalman::{ObservationModelLinear, KalmanFilterNoControl};
-
-mod motion_model;
-mod print_csv;
+use adskalman_examples::print_csv;
 
 type MyType = f64;
 

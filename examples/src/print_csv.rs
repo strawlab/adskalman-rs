@@ -6,7 +6,7 @@ use na::RealField;
 // print to csv --------
 
 #[allow(dead_code)]
-pub(crate) fn print_csv<R: RealField>(times: &Vec<R>,
+pub fn print_csv<R: RealField>(times: &Vec<R>,
     state: &Vec< VectorN<R,U4>>,
     observation: &Vec< VectorN<R,U2>>,
     state_estimates: &Vec< VectorN<R,U4>>,

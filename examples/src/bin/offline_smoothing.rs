@@ -5,9 +5,9 @@ use nalgebra_rand_mvn::rand_mvn;
 
 use adskalman::{ObservationModelLinear, KalmanFilterNoControl};
 
-mod motion_model;
-mod linear_observation_model;
-mod print_csv;
+use adskalman_examples::motion_model;
+use adskalman_examples::linear_observation_model;
+use adskalman_examples::print_csv;
 
 type MyType = f64;
 

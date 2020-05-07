@@ -1,5 +1,6 @@
 [package]
 name = "adskalman-examples"
+description = "Examples for the adskalman crate"
 version = "0.1.0"
 authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
@@ -9,3 +10,4 @@ nalgebra = "0.21"
 adskalman = {path=".."}
 nalgebra-rand-mvn = {git="https://github.com/strawlab/nalgebra-rand-mvn", rev="da0e4cfbbde132eee0dabda9d874f88f0a8a56ea"}
 env_logger = "0.7"
+log = { version = "0.4", features = ["release_max_level_debug"] }

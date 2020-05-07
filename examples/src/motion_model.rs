@@ -9,15 +9,15 @@ use adskalman::TransitionModelLinearNoControl;
 // motion model -------
 
 #[allow(dead_code)]
-pub(crate) struct ConstantVelocity2DModel<R>
+pub struct ConstantVelocity2DModel<R>
     where
         R: RealField,
         DefaultAllocator: Allocator<R, U4, U4>,
         DefaultAllocator: Allocator<R, U4>,
 {
-    pub(crate) transition_model: MatrixN<R,U4>,
-    pub(crate) transition_model_transpose: MatrixN<R,U4>,
-    pub(crate) transition_noise_covariance: MatrixN<R,U4>,
+    pub transition_model: MatrixN<R,U4>,
+    pub transition_model_transpose: MatrixN<R,U4>,
+    pub transition_noise_covariance: MatrixN<R,U4>,
 }
 
 impl<R> ConstantVelocity2DModel<R>
@@ -25,7 +25,7 @@ impl<R> ConstantVelocity2DModel<R>
         R: RealField,
 {
     #[allow(dead_code)]
-    pub(crate) fn new(dt: R, noise_scale: R) -> Self {
+    pub fn new(dt: R, noise_scale: R) -> Self {
         let one = na::convert(1.0);
         let zero = na::convert(0.0);
         // Create transition model. 2D position and 2D velocity.
