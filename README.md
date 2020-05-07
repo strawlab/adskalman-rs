@@ -4,9 +4,10 @@
 
 Kalman filter implementation
 
-* supports `no_std` operation to run on embedded devices
-* general of state dimension and motion and observation models
+* estimating state of arbitrary dimension using and observations of arbitrary dimension
+* types checked at compile time
 * uses [nalgebra](https://nalgebra.org) for linear algebra
+* supports `no_std` operation to run on embedded devices
 
 ### disabling log::trace in release builds
 
@@ -23,6 +24,9 @@ log = { version = "0.4", features = ["release_max_level_debug"] }
 See [the `log` documentation](https://docs.rs/log/) for more information.
 
 ### Running the examples
+
+There are several examples in the `examples/` directory, which is its own crate.
+Run them like so:
 
 ```
 cd examples

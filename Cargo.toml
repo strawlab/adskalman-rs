@@ -3,6 +3,11 @@ name = "adskalman"
 version = "0.1.0"
 authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
+description = "Kalman Filter implementation using nalgebra, no_std"
+license = "MIT/Apache-2.0"
+readme = "README.md"
+keywords = ["kalman", "bayesian"]
+categories = ["algorithms", "no-std", "science", "science::robotics"]
 
 [dependencies]
 nalgebra = {version="0.21", default-features=false}
