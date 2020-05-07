@@ -70,8 +70,6 @@ pub use error::{KalmanError, ErrorKind};
 mod state_and_covariance;
 pub use state_and_covariance::StateAndCovariance;
 
-pub type Result<T> = core::result::Result<T,KalmanError>;
-
 /// A linear model of process dynamics with no control inputs
 pub trait TransitionModelLinearNoControl<R, SS>
     where
