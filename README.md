@@ -1,5 +1,7 @@
 # adskalman-rs
 
+[![build](https://github.com/strawlab/adskalman-rs/workflows/build/badge.svg?branch=master)](https://github.com/strawlab/adskalman-rs/actions?query=branch%3Amaster)
+
 Kalman filter implementation
 
 * supports `no_std` operation to run on embedded devices
