@@ -9,12 +9,11 @@ nalgebra = {version="0.21", default-features=false}
 num-traits = {version="0.2", default-features=false}
 log = { version = "0.4", optional=true }
 itertools = {version="0.9", default-features=false}
-pretty-print-nalgebra = {git="https://github.com/strawlab/pretty-print-nalgebra", rev="f57a71ee3f3c61c5bf1344338a1da3c3f44e69db", optional=true}
 approx = {version="0.3", default-features=false}
 
 [features]
 default = ["std"]
-std = ["log", "pretty-print-nalgebra"]
+std = ["log"]
 
 [workspace]
 members = ["examples"]
