@@ -24,8 +24,3 @@ pub fn print_csv<R: RealField>(times: &Vec<R>,
         );
     }
 }
-
-#[allow(dead_code)]
-fn main() {
-    // TODO: can this .rs file be compiled just as a lib?
-}

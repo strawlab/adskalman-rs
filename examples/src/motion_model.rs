@@ -73,8 +73,3 @@ impl<R> TransitionModelLinearNoControl<R, U4> for ConstantVelocity2DModel<R>
         &self.transition_noise_covariance
     }
 }
-
-#[allow(dead_code)]
-fn main() {
-    // TODO: can this .rs file be compiled just as a lib?
-}
