@@ -1,4 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+//! Kalman Filter implementation using nalgebra, `no_std`
+//!
+//! See [our examples](https://github.com/strawlab/adskalman-rs/tree/master/examples).
 
 // Ideas for improvement:
 //  - See http://mocha-java.uccs.edu/ECE5550/, especially
