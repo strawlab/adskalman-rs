@@ -19,3 +19,10 @@ log = { version = "0.4", features = ["release_max_level_debug"] }
 ```
 
 See [the `log` documentation](https://docs.rs/log/) for more information.
+
+### Running the examples
+
+```
+cd examples
+cargo run --bin online_tracking
+```
