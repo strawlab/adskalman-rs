@@ -1,5 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-//! Kalman Filter implementation using nalgebra, `no_std`
+//! Kalman filter and Rauch-Tung-Striebel smoothing implementation using nalgebra, `no_std`
 //!
 //! See [our examples](https://github.com/strawlab/adskalman-rs/tree/master/examples).
 

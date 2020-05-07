@@ -2,7 +2,7 @@
 
 [![build](https://github.com/strawlab/adskalman-rs/workflows/build/badge.svg?branch=master)](https://github.com/strawlab/adskalman-rs/actions?query=branch%3Amaster)
 
-Kalman filter implementation
+Kalman filter and Rauch-Tung-Striebel smoothing implementation
 
 * estimating state of arbitrary dimension using and observations of arbitrary dimension
 * types checked at compile time
