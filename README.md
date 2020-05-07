@@ -2,12 +2,13 @@
 
 [![build](https://github.com/strawlab/adskalman-rs/workflows/build/badge.svg?branch=master)](https://github.com/strawlab/adskalman-rs/actions?query=branch%3Amaster)
 
-Kalman filter and Rauch-Tung-Striebel smoothing implementation
+Kalman filter and Rauch-Tung-Striebel smoothing implementation.
 
-* estimating state of arbitrary dimension using and observations of arbitrary dimension
-* types checked at compile time
-* uses [nalgebra](https://nalgebra.org) for linear algebra
-* supports `no_std` operation to run on embedded devices
+* Includes various methods of computing the covariance matrix on the update step.
+* Estimates state of arbitrary dimensions using observations of arbitrary dimension.
+* Types are checked at compile time.
+* Uses [nalgebra](https://nalgebra.org) for linear algebra.
+* Supports `no_std` operation to run on embedded devices.
 
 ### disabling log::trace in release builds
 

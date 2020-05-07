@@ -1,7 +1,18 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-//! Kalman filter and Rauch-Tung-Striebel smoothing implementation using nalgebra, `no_std`
+//! Kalman filter and Rauch-Tung-Striebel smoothing implementation using
+//! nalgebra, `no_std`
 //!
-//! See [our examples](https://github.com/strawlab/adskalman-rs/tree/master/examples).
+//! Includes [various methods of computing the covariance matrix on the update
+//! step](enum.CoverianceUpdateMethod.html).
+//!
+//! See [our
+//! examples](https://github.com/strawlab/adskalman-rs/tree/master/examples).
+//!
+//! **Panics** This code will panic if you provide a covariance method which is
+//! not positive semi-definite. The covariance computed by the update step here
+//! uses the
+//! [OptimalKalmanForcedSymmetric](enum.CoverianceUpdateMethod.html#variant.OptimalKalmanForcedSymmetric)
+//! variant by default, which ensures this holds for the results.
 
 // Ideas for improvement:
 //  - See http://mocha-java.uccs.edu/ECE5550/, especially
@@ -62,10 +73,6 @@ macro_rules! pretty_print {
         result_els.into_iter().collect::<Vec<_>>().join("\n")
     }}
 }
-
-
-mod error;
-pub use error::{KalmanError, ErrorKind};
 
 mod state_and_covariance;
 pub use state_and_covariance::StateAndCovariance;
@@ -267,7 +274,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// model using the `CoverianceUpdateMethod::OptimalKalmanForcedSymmetric`
     /// covariance update method.
     ///
-    /// This is a convenience function calling [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options)
+    /// This is a convenience method calling [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options)
     pub fn step(&self, previous_estimate: &StateAndCovariance<R,SS>, observation: &VectorN<R,OS>)
         -> StateAndCovariance<R,SS>
     {
