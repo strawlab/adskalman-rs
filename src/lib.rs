@@ -261,23 +261,28 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// If any component of the observation is NaN (not a number), the
     /// observation will not be used but rather the prior will be returned as
     /// the posterior without performing the update step.
+    ///
+    /// This calls the prediction step of the transition model and then, if
+    /// there is a (non-`nan`) observation, calls the update step of the observation
+    /// model using the `CoverianceUpdateMethod::OptimalKalmanForcedSymmetric`
+    /// covariance update method.
+    ///
+    /// This is a convenience function calling [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options)
     pub fn step(&self, previous_estimate: &StateAndCovariance<R,SS>, observation: &VectorN<R,OS>)
         -> StateAndCovariance<R,SS>
     {
-        let prior = self.transition_model.predict(previous_estimate);
-
-        if observation.iter().any(|x| is_nan(*x)) {
-            prior
-        } else {
-            self.observation_matrix.update(
-                &prior,
-                observation,
-                CoverianceUpdateMethod::OptimalKalmanForcedSymmetric,
-                )
-        }
+        self.step_with_options(previous_estimate, observation, CoverianceUpdateMethod::OptimalKalmanForcedSymmetric)
     }
 
-    /// Perform Kalman prediction and update steps
+    /// Perform Kalman prediction and update steps with default values
+    ///
+    /// If any component of the observation is NaN (not a number), the
+    /// observation will not be used but rather the prior will be returned as
+    /// the posterior without performing the update step.
+    ///
+    /// This calls the prediction step of the transition model and then, if
+    /// there is a (non-`nan`) observation, calls the update step of the
+    /// observation model using the specified covariance update method.
     pub fn step_with_options(&self,
         previous_estimate: &StateAndCovariance<R,SS>,
         observation: &VectorN<R,OS>,
@@ -286,30 +291,15 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
         -> StateAndCovariance<R,SS>
     {
         let prior = self.transition_model.predict(previous_estimate);
-        self.observation_matrix.update(
-            &prior,
-            observation,
-            covariance_update_method,
+        if observation.iter().any(|x| is_nan(*x)) {
+            prior
+        } else {
+            self.observation_matrix.update(
+                &prior,
+                observation,
+                covariance_update_method,
             )
-    }
-
-    /// Kalman filter
-    ///
-    /// Operates on entire time series in one shot and returns a vector of state
-    /// estimates. To be mathematically correct, the interval between
-    /// observations must be the `dt` specified in the motion model.
-    ///
-    /// If any observation has a NaN component, it is treated as missing.
-    #[cfg(feature="std")]
-    pub fn filter(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Vec<StateAndCovariance<R,SS>> {
-
-        let mut state_estimates = Vec::with_capacity(observations.len());
-        let empty = StateAndCovariance::new(na::zero(), na::MatrixN::<R,SS>::identity());
-        for _ in 0..observations.len() {
-            state_estimates.push(empty.clone());
         }
-        self.filter_inplace(initial_estimate, observations, &mut state_estimates);
-        state_estimates
     }
 
     /// Kalman filter (operates on in-place data without allocating)
@@ -328,6 +318,21 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
             *state_estimate = this_estimate.clone();
             previous_estimate = this_estimate;
         }
+    }
+
+    /// Kalman filter
+    ///
+    /// This is a convenience function that calls [`filter_inplace`](struct.KalmanFilterNoControl.html#method.filter_inplace).
+    #[cfg(feature="std")]
+    pub fn filter(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Vec<StateAndCovariance<R,SS>> {
+
+        let mut state_estimates = Vec::with_capacity(observations.len());
+        let empty = StateAndCovariance::new(na::zero(), na::MatrixN::<R,SS>::identity());
+        for _ in 0..observations.len() {
+            state_estimates.push(empty.clone());
+        }
+        self.filter_inplace(initial_estimate, observations, &mut state_estimates);
+        state_estimates
     }
 
     /// Rauch-Tung-Striebel (RTS) smoother

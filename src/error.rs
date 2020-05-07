@@ -1,8 +1,11 @@
+
+/// An error
 #[derive(Debug)]
 pub struct KalmanError {
     kind: ErrorKind,
 }
 
+/// The kinds of errors
 #[derive(Debug)]
 pub enum ErrorKind {
     /// The covariance matrix is not positive semi-definite (or is not symmetric).
