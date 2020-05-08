@@ -3,7 +3,6 @@
 [![Crates.io](https://img.shields.io/crates/v/adskalman.svg)](https://crates.io/crates/adskalman)
 [![Documentation](https://docs.rs/adskalman/badge.svg)](https://docs.rs/adskalman/)
 [![Crate License](https://img.shields.io/crates/l/adskalman.svg)](https://crates.io/crates/adskalman)
-[![Dependency status](https://deps.rs/repo/github/strawlab/adskalman-rs/status.svg)](https://deps.rs/repo/github/strawlab/adskalman-rs)
 [![build](https://github.com/strawlab/adskalman-rs/workflows/build/badge.svg?branch=master)](https://github.com/strawlab/adskalman-rs/actions?query=branch%3Amaster)
 
 Kalman filter and Rauch-Tung-Striebel smoothing implementation.
