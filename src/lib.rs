@@ -7,12 +7,6 @@
 //!
 //! See [our
 //! examples](https://github.com/strawlab/adskalman-rs/tree/master/examples).
-//!
-//! **Panics** This code will panic if you provide a covariance method which is
-//! not positive semi-definite. The covariance computed by the update step here
-//! uses the
-//! [OptimalKalmanForcedSymmetric](enum.CoverianceUpdateMethod.html#variant.OptimalKalmanForcedSymmetric)
-//! variant by default, which ensures this holds for the results.
 
 // Ideas for improvement:
 //  - See http://mocha-java.uccs.edu/ECE5550/, especially
@@ -74,6 +68,9 @@ macro_rules! pretty_print {
     }}
 }
 
+mod error;
+pub use error::{Error, ErrorKind};
+
 mod state_and_covariance;
 pub use state_and_covariance::StateAndCovariance;
 
@@ -128,7 +125,7 @@ pub trait ObservationModelLinear<R, SS, OS>
         observation: &VectorN<R,OS>,
         covariance_method: CoverianceUpdateMethod,
     )
-        -> StateAndCovariance<R,SS>
+        -> Result<StateAndCovariance<R,SS>, Error>
     {
         // Use conventional (e.g. wikipedia) names for these variables
         let h = self.observation_matrix();
@@ -160,7 +157,7 @@ pub trait ObservationModelLinear<R, SS, OS>
                 // Maybe state covariance is not symmetric or
                 // for from positive definite? Also, observation
                 // noise should be positive definite.
-                panic!("Innovation covariance not positive definite.");
+                return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
             }
         };
         let s_inv: MatrixMN<R,OS,OS> = s_chol.inverse();
@@ -209,7 +206,7 @@ pub trait ObservationModelLinear<R, SS, OS>
 
         debug_assert_symmetric!(covariance);
 
-        StateAndCovariance::new(state, covariance)
+        Ok(StateAndCovariance::new(state, covariance))
     }
 }
 
@@ -276,7 +273,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     ///
     /// This is a convenience method calling [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options)
     pub fn step(&self, previous_estimate: &StateAndCovariance<R,SS>, observation: &VectorN<R,OS>)
-        -> StateAndCovariance<R,SS>
+        -> Result<StateAndCovariance<R,SS>,Error>
     {
         self.step_with_options(previous_estimate, observation, CoverianceUpdateMethod::OptimalKalmanForcedSymmetric)
     }
@@ -295,11 +292,11 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
         observation: &VectorN<R,OS>,
         covariance_update_method: CoverianceUpdateMethod,
     )
-        -> StateAndCovariance<R,SS>
+        -> Result<StateAndCovariance<R,SS>,Error>
     {
         let prior = self.transition_model.predict(previous_estimate);
         if observation.iter().any(|x| is_nan(*x)) {
-            prior
+            Ok(prior)
         } else {
             self.observation_matrix.update(
                 &prior,
@@ -316,30 +313,31 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// observations must be the `dt` specified in the motion model.
     ///
     /// If any observation has a NaN component, it is treated as missing.
-    pub fn filter_inplace(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>], state_estimates: &mut [StateAndCovariance<R,SS>]) {
+    pub fn filter_inplace(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>], state_estimates: &mut [StateAndCovariance<R,SS>]) -> Result<(), Error> {
         let mut previous_estimate = initial_estimate.clone();
         assert!(state_estimates.len() >= observations.len());
 
         for (this_observation, state_estimate) in observations.iter().zip(state_estimates.iter_mut()) {
-            let this_estimate = self.step(&previous_estimate, this_observation);
+            let this_estimate = self.step(&previous_estimate, this_observation)?;
             *state_estimate = this_estimate.clone();
             previous_estimate = this_estimate;
         }
+        Ok(())
     }
 
     /// Kalman filter
     ///
     /// This is a convenience function that calls [`filter_inplace`](struct.KalmanFilterNoControl.html#method.filter_inplace).
     #[cfg(feature="std")]
-    pub fn filter(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Vec<StateAndCovariance<R,SS>> {
+    pub fn filter(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Result<Vec<StateAndCovariance<R,SS>>, Error> {
 
         let mut state_estimates = Vec::with_capacity(observations.len());
         let empty = StateAndCovariance::new(na::zero(), na::MatrixN::<R,SS>::identity());
         for _ in 0..observations.len() {
             state_estimates.push(empty.clone());
         }
-        self.filter_inplace(initial_estimate, observations, &mut state_estimates);
-        state_estimates
+        self.filter_inplace(initial_estimate, observations, &mut state_estimates)?;
+        Ok(state_estimates)
     }
 
     /// Rauch-Tung-Striebel (RTS) smoother
@@ -350,8 +348,8 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     ///
     /// If any observation has a NaN component, it is treated as missing.
     #[cfg(feature="std")]
-    pub fn smooth(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Vec<StateAndCovariance<R,SS>> {
-        let forward_results = self.filter(initial_estimate, observations);
+    pub fn smooth(&self, initial_estimate: &StateAndCovariance<R,SS>, observations: &[VectorN<R,OS>]) -> Result<Vec<StateAndCovariance<R,SS>>, Error> {
+        let forward_results = self.filter(initial_estimate, observations)?;
         self.smooth_from_filtered(forward_results)
     }
 
@@ -361,7 +359,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
     /// estimates. To be mathematically correct, the interval between
     /// observations must be the `dt` specified in the motion model.
     #[cfg(feature="std")]
-    pub fn smooth_from_filtered(&self, mut forward_results: Vec<StateAndCovariance<R,SS>>) -> Vec<StateAndCovariance<R,SS>> {
+    pub fn smooth_from_filtered(&self, mut forward_results: Vec<StateAndCovariance<R,SS>>) -> Result<Vec<StateAndCovariance<R,SS>>,Error> {
         forward_results.reverse();
 
         let mut smoothed_backwards = Vec::with_capacity(forward_results.len());
@@ -369,22 +367,22 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
         let mut smooth_future = forward_results[0].clone();
         smoothed_backwards.push(smooth_future.clone());
         for filt in forward_results.iter().skip(1) {
-            smooth_future = self.smooth_step(&smooth_future,filt);
+            smooth_future = self.smooth_step(&smooth_future,filt)?;
             smoothed_backwards.push(smooth_future.clone());
         }
 
         smoothed_backwards.reverse();
-        smoothed_backwards
+        Ok(smoothed_backwards)
     }
 
     #[cfg(feature="std")]
-    fn smooth_step(&self, smooth_future: &StateAndCovariance<R,SS>, filt: &StateAndCovariance<R,SS>) -> StateAndCovariance<R,SS> {
+    fn smooth_step(&self, smooth_future: &StateAndCovariance<R,SS>, filt: &StateAndCovariance<R,SS>) -> Result<StateAndCovariance<R,SS>, Error> {
         let prior = self.transition_model.predict(filt);
 
         let v_chol = match na::linalg::Cholesky::new(prior.covariance().clone()) {
             Some(v) => v,
             None => {
-                panic!("Covariance not positive semi-definite.");
+                return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
             },
         };
         let inv_prior_covariance: MatrixMN<R,SS,SS> = v_chol.inverse();
@@ -401,7 +399,7 @@ impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
         let covar_residuals = smooth_future.covariance() - prior.covariance();
         let covariance = filt.covariance() + &j * (covar_residuals * j.transpose());
 
-        StateAndCovariance::new(state, covariance )
+        Ok(StateAndCovariance::new(state, covariance ))
     }
 
 }

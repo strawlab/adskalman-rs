@@ -13,7 +13,7 @@ type MyType = f64;
 
 // the main program --------
 
-fn main() {
+fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
 
     let dt = 0.01;
@@ -56,9 +56,10 @@ fn main() {
 
     let mut state_estimates = vec![];
     for this_observation in observation.iter() {
-        let this_estimate = kf.step(&previous_estimate, this_observation);
+        let this_estimate = kf.step(&previous_estimate, this_observation)?;
         state_estimates.push(this_estimate.state().clone());
         previous_estimate = this_estimate;
     }
     print_csv::print_csv(&times, &state, &observation, &state_estimates);
+    Ok(())
 }

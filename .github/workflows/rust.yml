@@ -18,7 +18,7 @@ jobs:
     - name: Test
       run: cargo test
     - name: Build and run example
-      run: cd examples && cargo run --bin online_tracking
+      run: cd examples && cargo build && cargo run --bin online_tracking
 
   nostd-ubuntu:
 

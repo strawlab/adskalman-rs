@@ -13,7 +13,7 @@ type MyType = f64;
 
 // the main program --------
 
-fn main() {
+fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
 
     let dt = 0.01;
@@ -53,11 +53,12 @@ fn main() {
     }
 
     let initial_estimate = adskalman::StateAndCovariance::new(true_initial_state, initial_covariance);
-    let estimates = kf.smooth(&initial_estimate, &observation);
+    let estimates = kf.smooth(&initial_estimate, &observation)?;
 
     let mut state_estimates = vec![];
     for this_estimate in estimates.iter() {
         state_estimates.push(this_estimate.state().clone());
     }
     print_csv::print_csv(&times, &state, &observation, &state_estimates);
+    Ok(())
 }
