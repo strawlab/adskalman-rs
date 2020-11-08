@@ -1,27 +1,27 @@
-use nalgebra as na;
-use na::{VectorN, MatrixN};
-use na::{DefaultAllocator, DimName, RealField};
 use na::allocator::Allocator;
+use na::{DefaultAllocator, DimName, RealField};
+use na::{MatrixN, VectorN};
+use nalgebra as na;
 
 /// State and covariance pair for a given estimate
 #[derive(Debug, Clone)]
 pub struct StateAndCovariance<R, SS>
-    where
-        R: RealField,
-        SS: DimName,
-        DefaultAllocator: Allocator<R, SS, SS>,
-        DefaultAllocator: Allocator<R, SS>,
+where
+    R: RealField,
+    SS: DimName,
+    DefaultAllocator: Allocator<R, SS, SS>,
+    DefaultAllocator: Allocator<R, SS>,
 {
     state: VectorN<R, SS>,
     covariance: MatrixN<R, SS>,
 }
 
 impl<R, SS> StateAndCovariance<R, SS>
-    where
-        R: RealField,
-        SS: DimName,
-        DefaultAllocator: Allocator<R, SS, SS>,
-        DefaultAllocator: Allocator<R, SS>,
+where
+    R: RealField,
+    SS: DimName,
+    DefaultAllocator: Allocator<R, SS, SS>,
+    DefaultAllocator: Allocator<R, SS>,
 {
     /// Create a new `StateAndCovariance`.
     ///
