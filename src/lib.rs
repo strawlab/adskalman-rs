@@ -447,7 +447,7 @@ where
 #[inline]
 fn is_nan<R: RealField>(x: R) -> bool {
     // Why isn't this implemented for RealField directly?
-    let zero = na::convert(0.0);
+    let zero = R::zero();
     if x < zero {
         false
     } else {
