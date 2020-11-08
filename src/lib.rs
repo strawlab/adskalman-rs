@@ -116,6 +116,12 @@ where
     DefaultAllocator: Allocator<(usize, usize), OS>,
 {
     /// For a given state, predict the observation.
+    ///
+    /// If an observation is not possible, this returns NaN values. (This
+    /// happens, for example, when a non-linear observation model implements
+    /// this trait and must be evaluated for a state for which no observation is
+    /// possible.) Observations with NaN values are treated as missing
+    /// observations.
     fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS>;
 
     /// Get the observation model
