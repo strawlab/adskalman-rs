@@ -81,9 +81,13 @@ where
     DefaultAllocator: Allocator<R, SS, SS>,
     DefaultAllocator: Allocator<R, SS>,
 {
+    /// Get the state transition model.
     fn transition_model(&self) -> &MatrixN<R, SS>;
+    /// Get the transpose of the state transition model.
     fn transition_model_transpose(&self) -> &MatrixN<R, SS>;
+    /// Get the transition noise covariance.
     fn transition_noise_covariance(&self) -> &MatrixN<R, SS>;
+    /// Predict new state from old state.
     fn predict(&self, previous_estimate: &StateAndCovariance<R, SS>) -> StateAndCovariance<R, SS> {
         let state = self.transition_model() * previous_estimate.state();
         let covariance = ((self.transition_model() * previous_estimate.covariance())

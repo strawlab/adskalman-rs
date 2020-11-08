@@ -14,6 +14,7 @@ type MyType = f64;
 
 // observation model -------
 
+/// In this example, a 4D state and a 2D observation.
 struct NonlinearObservationModel {}
 
 impl NonlinearObservationModel {
