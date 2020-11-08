@@ -14,14 +14,18 @@ type MyType = f64;
 
 // observation model -------
 
-/// In this example, a 4D state and a 2D observation.
+/// This example has a 4D state and a 2D observation.
+///
+/// The observation is [x**3, xy].
 struct NonlinearObservationModel {}
 
 impl NonlinearObservationModel {
+    /// Construct a new `NonlinearObservationModel`.
     fn new() -> Self {
         Self {}
     }
-    fn linearize_at(&self, state: &VectorN<MyType, U4>) -> Result<MyObservationModel, ()> {
+    /// Construct a new `LinearizedObservationModel` by linearizing around `state`.
+    fn linearize_at(&self, state: &VectorN<MyType, U4>) -> Result<LinearizedObservationModel, ()> {
         let evaluation_func = |state: &VectorN<MyType, U4>| {
             VectorN::<MyType, U2>::new(state.x * state.x * state.x, state.x * state.y)
         };
@@ -29,13 +33,13 @@ impl NonlinearObservationModel {
         // Create observation model. We only observe the position.
         #[rustfmt::skip]
         let observation_matrix = MatrixMN::<MyType, U2, U4>::new(
-            3.0 * state.x * state.x, 0.0, 0.0,0.0,
-            state.y, state.x,0.0,0.0,
+            3.0 * state.x * state.x, 0.0, 0.0, 0.0,
+            state.y, state.x, 0.0, 0.0,
         );
         let observation_matrix_transpose = observation_matrix.transpose();
         let observation_noise_covariance = MatrixN::<MyType, U2>::new(0.01, 0.0, 0.0, 0.01);
 
-        Ok(MyObservationModel {
+        Ok(LinearizedObservationModel {
             evaluation_func: Box::new(evaluation_func),
             observation_matrix,
             observation_matrix_transpose,
@@ -44,7 +48,7 @@ impl NonlinearObservationModel {
     }
 }
 
-struct MyObservationModel
+struct LinearizedObservationModel
 where
     DefaultAllocator: Allocator<MyType, U4, U4>,
     DefaultAllocator: Allocator<MyType, U2, U4>,
@@ -58,7 +62,7 @@ where
     observation_noise_covariance: MatrixN<MyType, U2>,
 }
 
-impl ObservationModelLinear<MyType, U4, U2> for MyObservationModel
+impl ObservationModelLinear<MyType, U4, U2> for LinearizedObservationModel
 where
     DefaultAllocator: Allocator<MyType, U4, U4>,
     DefaultAllocator: Allocator<MyType, U2, U4>,
