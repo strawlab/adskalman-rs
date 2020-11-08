@@ -5,8 +5,6 @@ use na::{DefaultAllocator, RealField};
 use na::{MatrixMN, MatrixN, VectorN};
 use nalgebra as na;
 
-use adskalman::ObservationModelLinear;
-
 // observation model -------
 
 pub struct PositionObservationModel<R: RealField>
@@ -42,7 +40,7 @@ impl<R: RealField> PositionObservationModel<R> {
     }
 }
 
-impl<R: RealField> ObservationModelLinear<R, U4, U2> for PositionObservationModel<R>
+impl<R: RealField> adskalman::ObservationModelLinear<R, U4, U2> for PositionObservationModel<R>
 where
     DefaultAllocator: Allocator<R, U4, U4>,
     DefaultAllocator: Allocator<R, U2, U4>,
@@ -62,7 +60,7 @@ where
     fn observation_noise_covariance(&self) -> &MatrixN<R, U2> {
         &self.observation_noise_covariance
     }
-    fn evaluate(&self, state: &VectorN<R, U4>) -> VectorN<R, U2> {
-        &self.observation_matrix * state
+    fn evaluate(&self, state: &VectorN<R, U4>) -> Option<VectorN<R, U2>> {
+        Some(&self.observation_matrix * state)
     }
 }

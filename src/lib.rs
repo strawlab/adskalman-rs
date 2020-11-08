@@ -116,7 +116,7 @@ where
     DefaultAllocator: Allocator<(usize, usize), OS>,
 {
     /// For a given state, predict the observation.
-    fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS>;
+    fn evaluate(&self, state: &VectorN<R, SS>) -> Option<VectorN<R, OS>>;
 
     /// Get the observation model
     fn observation_matrix(&self) -> &MatrixMN<R, OS, SS>;
@@ -174,7 +174,12 @@ where
         // let k_gain: MatrixMN<R,SS,OS> = solve!( (p*ht), s );
         trace!("k_gain {}", pretty_print!(k_gain));
 
-        let predicted: VectorN<R, OS> = self.evaluate(prior.state());
+        let predicted: VectorN<R, OS> = match self.evaluate(prior.state()) {
+            Some(predicted) => predicted,
+            None => {
+                return Err(ErrorKind::NoPredictionPossible.into());
+            }
+        };
         trace!("predicted {}", pretty_print!(predicted));
         trace!("observation {}", pretty_print!(observation));
         let innovation: VectorN<R, OS> = observation - predicted;

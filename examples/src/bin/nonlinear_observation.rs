@@ -6,7 +6,7 @@ use na::{MatrixMN, MatrixN, Vector2, Vector4, VectorN};
 use nalgebra as na;
 use nalgebra_rand_mvn::rand_mvn;
 
-use adskalman::{KalmanFilterNoControl, ObservationModelLinear};
+use adskalman::{KalmanFilterNoControl, ObservationModelLinear, TransitionModelLinearNoControl};
 use adskalman_examples::motion_model;
 use adskalman_examples::print_csv;
 
@@ -23,14 +23,17 @@ impl NonlinearObservationModel {
     }
     fn linearize_at(&self, state: &VectorN<MyType, U4>) -> Result<MyObservationModel, ()> {
         let evaluation_func = |state: &VectorN<MyType, U4>| {
-            VectorN::<MyType, U2>::new(state.x * state.x * state.x, state.x * state.y)
+            Some(VectorN::<MyType, U2>::new(
+                state.x * state.x * state.x,
+                state.x * state.y,
+            ))
         };
 
-        // Create observation model. We only observe the position.
+        // Create observation model. We observe a nonlinear transformed position.
         #[rustfmt::skip]
         let observation_matrix = MatrixMN::<MyType, U2, U4>::new(
-            3.0 * state.x * state.x, 0.0, 0.0,0.0,
-            state.y, state.x,0.0,0.0,
+            3.0 * state.x * state.x, 0.0, 0.0, 0.0,
+            state.y, state.x, 0.0, 0.0,
         );
         let observation_matrix_transpose = observation_matrix.transpose();
         let observation_noise_covariance = MatrixN::<MyType, U2>::new(0.01, 0.0, 0.0, 0.01);
@@ -52,7 +55,7 @@ where
     DefaultAllocator: Allocator<MyType, U2, U2>,
     DefaultAllocator: Allocator<MyType, U4>,
 {
-    evaluation_func: Box<dyn Fn(&VectorN<MyType, U4>) -> VectorN<MyType, U2>>,
+    evaluation_func: Box<dyn Fn(&VectorN<MyType, U4>) -> Option<VectorN<MyType, U2>>>,
     observation_matrix: MatrixMN<MyType, U2, U4>,
     observation_matrix_transpose: MatrixMN<MyType, U4, U2>,
     observation_noise_covariance: MatrixN<MyType, U2>,
@@ -78,8 +81,25 @@ where
     fn observation_noise_covariance(&self) -> &MatrixN<MyType, U2> {
         &self.observation_noise_covariance
     }
-    fn evaluate(&self, state: &VectorN<MyType, U4>) -> VectorN<MyType, U2> {
+    fn evaluate(&self, state: &VectorN<MyType, U4>) -> Option<VectorN<MyType, U2>> {
         (*self.evaluation_func)(state)
+    }
+}
+
+/// Given an observation model, compute a noisy observation for a state
+fn compute_observation(
+    observation_model_gen: &NonlinearObservationModel,
+    state: &VectorN<MyType, U4>,
+) -> Option<VectorN<MyType, U2>> {
+    let observation_model = observation_model_gen.linearize_at(&state).unwrap();
+    let noise_sample: MatrixMN<MyType, U1, U2> = rand_mvn(
+        &Vector2::<MyType>::zeros(),
+        observation_model.observation_noise_covariance,
+    )
+    .unwrap();
+    match observation_model.evaluate(state) {
+        Some(noise_free_obs) => Some(noise_free_obs + noise_sample.transpose()),
+        None => None,
     }
 }
 
@@ -118,31 +138,33 @@ fn main() -> Result<(), anyhow::Error> {
     }
 
     // Create noisy observations.
-    let mut observation = vec![];
-    let zero2 = Vector2::<MyType>::zeros();
+    let mut observations = vec![];
     for current_state in state.iter() {
-        let observation_model = observation_model_gen.linearize_at(&current_state).unwrap();
-        let noise_sample: MatrixMN<MyType, U1, U2> =
-            rand_mvn(&zero2, observation_model.observation_noise_covariance).unwrap();
-        let noise_sample_col = noise_sample.transpose();
-        let current_observation = observation_model.evaluate(current_state) + noise_sample_col;
-        observation.push(current_observation);
+        observations.push(compute_observation(&observation_model_gen, &current_state));
     }
 
     let mut previous_estimate =
         adskalman::StateAndCovariance::new(true_initial_state, initial_covariance);
 
     let mut state_estimates = vec![];
-    for this_observation in observation.iter() {
-        let observation_model = observation_model_gen
-            .linearize_at(&previous_estimate.state())
-            .unwrap();
-        let kf = KalmanFilterNoControl::new(&motion_model, &observation_model);
+    for observation in observations.iter() {
+        let this_estimate = if let (Some(observation), Some(observation_model)) = (
+            observation.as_ref(),
+            observation_model_gen
+                .linearize_at(&previous_estimate.state())
+                .ok(),
+        ) {
+            // We have an observation and an observation model.
+            let kf = KalmanFilterNoControl::new(&motion_model, &observation_model);
+            kf.step(&previous_estimate, observation)?
+        } else {
+            // Update the estimate with no observation.
+            motion_model.predict(&previous_estimate)
+        };
 
-        let this_estimate = kf.step(&previous_estimate, this_observation)?;
         state_estimates.push(this_estimate.state().clone());
         previous_estimate = this_estimate;
     }
-    print_csv::print_csv(&times, &state, &observation, &state_estimates);
+    print_csv::print_csv_opt(&times, &state, &observations, &state_estimates);
     Ok(())
 }

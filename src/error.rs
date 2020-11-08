@@ -9,6 +9,8 @@ pub struct Error {
 pub enum ErrorKind {
     /// The covariance matrix is not positive semi-definite (or is not symmetric).
     CovarianceNotPositiveSemiDefinite,
+    /// No prediction is possible.
+    NoPredictionPossible,
 }
 
 #[cfg(feature = "std")]
@@ -17,8 +19,9 @@ impl std::fmt::Display for ErrorKind {
         use ErrorKind::*;
         let s = match self {
             CovarianceNotPositiveSemiDefinite => {
-                "The covariance matrix is not positive semi-definite (or is not symmetric)"
+                "The covariance matrix is not positive semi-definite (or is not symmetric)."
             }
+            NoPredictionPossible => "No prediction is possible.",
         };
         f.write_str(s)
     }
