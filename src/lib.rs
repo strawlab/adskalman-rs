@@ -115,14 +115,19 @@ where
     DefaultAllocator: Allocator<R, OS>,
     DefaultAllocator: Allocator<(usize, usize), OS>,
 {
+    /// For a given state, predict the observation.
     fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS>;
 
+    /// Get the observation model
     fn observation_matrix(&self) -> &MatrixMN<R, OS, SS>;
+    /// Get the transpose of the observation model.
     fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS>;
 
+    /// Get the observation noise covariance.
     // TODO: ensure this is positive definite?
     fn observation_noise_covariance(&self) -> &MatrixN<R, OS>;
 
+    /// Given a prior state and an observation, compute a posterior state estimate.
     fn update(
         &self,
         prior: &StateAndCovariance<R, SS>,
