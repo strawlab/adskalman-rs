@@ -6,7 +6,7 @@
 //! step](enum.CoverianceUpdateMethod.html).
 //!
 //! See [our
-//! examples](https://github.com/strawlab/adskalman-rs/tree/master/examples).
+//! examples](https://github.com/strawlab/adskalman-rs/tree/main/examples).
 
 // Ideas for improvement:
 //  - See http://mocha-java.uccs.edu/ECE5550/, especially
