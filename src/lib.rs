@@ -92,33 +92,11 @@ where
     /// Get the state transition model, `F`.
     fn F(&self) -> &MatrixN<R, SS>;
 
-    /// Get the state transition model, `F`.
-    #[deprecated(since = "0.5.0", note = "Please use the F function instead")]
-    #[inline]
-    fn transition_model(&self) -> &MatrixN<R, SS> {
-        self.F()
-    }
-
     /// Get the transpose of the state transition model, `FT`.
-
     fn FT(&self) -> &MatrixN<R, SS>;
-
-    /// Get the transpose of the state transition model, `FT`.
-    #[deprecated(since = "0.5.0", note = "Please use the FT function instead")]
-    #[inline]
-    fn transition_model_transpose(&self) -> &MatrixN<R, SS> {
-        self.FT()
-    }
 
     /// Get the process covariance, `Q`.
     fn Q(&self) -> &MatrixN<R, SS>;
-
-    /// Get the transition noise covariance.
-    #[deprecated(since = "0.5.0", note = "Please use the Q function instead")]
-    #[inline]
-    fn transition_noise_covariance(&self) -> &MatrixN<R, SS> {
-        self.Q()
-    }
 
     /// Predict new state from previous estimate.
     fn predict(&self, previous_estimate: &StateAndCovariance<R, SS>) -> StateAndCovariance<R, SS> {
@@ -128,6 +106,27 @@ where
         let state = F * P;
         let covariance = ((F * previous_estimate.covariance()) * self.FT()) + self.Q();
         StateAndCovariance::new(state, covariance)
+    }
+
+    /// Get the state transition model, `F`.
+    #[deprecated(since = "0.5.0", note = "Please use the F function instead")]
+    #[inline]
+    fn transition_model(&self) -> &MatrixN<R, SS> {
+        self.F()
+    }
+
+    /// Get the transpose of the state transition model, `FT`.
+    #[deprecated(since = "0.5.0", note = "Please use the FT function instead")]
+    #[inline]
+    fn transition_model_transpose(&self) -> &MatrixN<R, SS> {
+        self.FT()
+    }
+
+    /// Get the transition noise covariance.
+    #[deprecated(since = "0.5.0", note = "Please use the Q function instead")]
+    #[inline]
+    fn transition_noise_covariance(&self) -> &MatrixN<R, SS> {
+        self.Q()
     }
 }
 
@@ -161,33 +160,12 @@ where
     /// Get the observation model, `H`.
     fn H(&self) -> &MatrixMN<R, OS, SS>;
 
-    /// Get the observation model, `H`.
-    #[deprecated(since = "0.5.0", note = "Please use the H function instead")]
-    #[inline]
-    fn observation_matrix(&self) -> &MatrixMN<R, OS, SS> {
-        self.H()
-    }
-
     /// Get the transpose of the observation model, `HT`.
     fn HT(&self) -> &MatrixMN<R, SS, OS>;
-
-    /// Get the transpose of the observation model, `HT`.
-    #[deprecated(since = "0.5.0", note = "Please use the HT function instead")]
-    #[inline]
-    fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS> {
-        self.HT()
-    }
 
     /// Get the observation noise covariance, `R`.
     // TODO: ensure this is positive definite?
     fn R(&self) -> &MatrixN<R, OS>;
-
-    /// Get the observation noise covariance, `R`.
-    #[deprecated(since = "0.5.0", note = "Please use the R function instead")]
-    #[inline]
-    fn observation_noise_covariance(&self) -> &MatrixN<R, OS> {
-        self.R()
-    }
 
     /// Given a prior state and an observation, compute a posterior state estimate.
     fn update(
@@ -273,6 +251,27 @@ where
         debug_assert_symmetric!(covariance);
 
         Ok(StateAndCovariance::new(state, covariance))
+    }
+
+    /// Get the observation model, `H`.
+    #[deprecated(since = "0.5.0", note = "Please use the H function instead")]
+    #[inline]
+    fn observation_matrix(&self) -> &MatrixMN<R, OS, SS> {
+        self.H()
+    }
+
+    /// Get the transpose of the observation model, `HT`.
+    #[deprecated(since = "0.5.0", note = "Please use the HT function instead")]
+    #[inline]
+    fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS> {
+        self.HT()
+    }
+
+    /// Get the observation noise covariance, `R`.
+    #[deprecated(since = "0.5.0", note = "Please use the R function instead")]
+    #[inline]
+    fn observation_noise_covariance(&self) -> &MatrixN<R, OS> {
+        self.R()
     }
 }
 
