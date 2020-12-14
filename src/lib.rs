@@ -1,12 +1,18 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-//! Kalman filter and Rauch-Tung-Striebel smoothing implementation using
-//! nalgebra, `no_std`
+//! Kalman filter and Rauch-Tung-Striebel smoothing implementation
 //!
-//! Includes [various methods of computing the covariance matrix on the update
-//! step](enum.CoverianceUpdateMethod.html).
+//! Characteristics:
+//! - Uses the [nalgebra](https://nalgebra.org) crate for math.
+//! - Supports `no_std` to facilitate running on embedded microcontrollers.
+//! - Includes [various methods of computing the covariance matrix on the update
+//!   step](enum.CoverianceUpdateMethod.html).
+//! - [Examples](https://github.com/strawlab/adskalman-rs/tree/main/examples)
+//!   included.
+//! - Strong typing used to ensure correct matrix dimensions at compile time.
 //!
-//! See [our
-//! examples](https://github.com/strawlab/adskalman-rs/tree/main/examples).
+//! Throughout the library, the generic type `SS` means "state size" and `OS` is
+//! "observation size". These refer to the number of dimensions of the state
+//! vector and observation vector, respectively.
 
 // Ideas for improvement:
 //  - See http://mocha-java.uccs.edu/ECE5550/, especially
