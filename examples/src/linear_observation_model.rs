@@ -5,7 +5,7 @@ use na::{DefaultAllocator, RealField};
 use na::{MatrixMN, MatrixN, VectorN};
 use nalgebra as na;
 
-use adskalman::ObservationModelLinear;
+use adskalman::ObservationModel;
 
 // observation model -------
 
@@ -42,7 +42,7 @@ impl<R: RealField> PositionObservationModel<R> {
     }
 }
 
-impl<R: RealField> ObservationModelLinear<R, U4, U2> for PositionObservationModel<R>
+impl<R: RealField> ObservationModel<R, U4, U2> for PositionObservationModel<R>
 where
     DefaultAllocator: Allocator<R, U4, U4>,
     DefaultAllocator: Allocator<R, U2, U4>,

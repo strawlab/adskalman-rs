@@ -130,12 +130,12 @@ where
     }
 }
 
-/// A linear observation model
+/// An observation model, potentially non-linear.
 ///
 /// Note, to use a non-linear observation model, the non-linear model must
 /// be linearized (using the prior state estimate) and use this linearization
-/// as the basis for a `ObservationModelLinear` implementation.
-pub trait ObservationModelLinear<R, SS, OS>
+/// as the basis for a `ObservationModel` implementation.
+pub trait ObservationModel<R, SS, OS>
 where
     R: RealField,
     SS: DimName,
@@ -155,7 +155,9 @@ where
     /// this trait and must be evaluated for a state for which no observation is
     /// possible.) Observations with NaN values are treated as missing
     /// observations.
-    fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS>;
+    fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS> {
+        self.H() * state
+    }
 
     /// Get the observation model, `H`.
     fn H(&self) -> &MatrixMN<R, OS, SS>;
@@ -299,7 +301,7 @@ where
     OS: DimName,
 {
     transition_model: &'a dyn TransitionModelLinearNoControl<R, SS>,
-    observation_matrix: &'a dyn ObservationModelLinear<R, SS, OS>,
+    observation_matrix: &'a dyn ObservationModel<R, SS, OS>,
 }
 
 impl<'a, R, SS, OS> KalmanFilterNoControl<'a, R, SS, OS>
@@ -324,7 +326,7 @@ where
     /// `R`.
     pub fn new(
         transition_model: &'a dyn TransitionModelLinearNoControl<R, SS>,
-        observation_matrix: &'a dyn ObservationModelLinear<R, SS, OS>,
+        observation_matrix: &'a dyn ObservationModel<R, SS, OS>,
     ) -> Self {
         Self {
             transition_model,

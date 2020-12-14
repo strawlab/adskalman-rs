@@ -6,7 +6,7 @@ use na::{MatrixMN, MatrixN, Vector2, Vector4, VectorN};
 use nalgebra as na;
 use nalgebra_rand_mvn::rand_mvn;
 
-use adskalman::{KalmanFilterNoControl, ObservationModelLinear};
+use adskalman::{KalmanFilterNoControl, ObservationModel};
 use adskalman_examples::motion_model;
 use adskalman_examples::print_csv;
 
@@ -30,7 +30,7 @@ impl NonlinearObservationModel {
             VectorN::<MyType, U2>::new(state.x * state.x * state.x, state.x * state.y)
         };
 
-        // Create observation model. We only observe the position.
+        // Create Jacobian of the observation model. We only observe the position.
         #[rustfmt::skip]
         let observation_matrix = MatrixMN::<MyType, U2, U4>::new(
             3.0 * state.x * state.x, 0.0, 0.0, 0.0,
@@ -62,7 +62,7 @@ where
     observation_noise_covariance: MatrixN<MyType, U2>,
 }
 
-impl ObservationModelLinear<MyType, U4, U2> for LinearizedObservationModel
+impl ObservationModel<MyType, U4, U2> for LinearizedObservationModel
 where
     DefaultAllocator: Allocator<MyType, U4, U4>,
     DefaultAllocator: Allocator<MyType, U2, U4>,

@@ -3,7 +3,7 @@ use na::{MatrixMN, MatrixN, Vector2, Vector4, VectorN};
 use nalgebra as na;
 use nalgebra_rand_mvn::rand_mvn;
 
-use adskalman::{KalmanFilterNoControl, ObservationModelLinear};
+use adskalman::{KalmanFilterNoControl, ObservationModel};
 
 use adskalman_examples::linear_observation_model;
 use adskalman_examples::motion_model;
