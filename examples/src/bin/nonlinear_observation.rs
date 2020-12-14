@@ -73,13 +73,13 @@ where
     DefaultAllocator: Allocator<(usize, usize), U2>,
     U2: DimMin<U2, Output = U2>,
 {
-    fn observation_matrix(&self) -> &MatrixMN<MyType, U2, U4> {
+    fn H(&self) -> &MatrixMN<MyType, U2, U4> {
         &self.observation_matrix
     }
-    fn observation_matrix_transpose(&self) -> &MatrixMN<MyType, U4, U2> {
+    fn HT(&self) -> &MatrixMN<MyType, U4, U2> {
         &self.observation_matrix_transpose
     }
-    fn observation_noise_covariance(&self) -> &MatrixN<MyType, U2> {
+    fn R(&self) -> &MatrixN<MyType, U2> {
         &self.observation_noise_covariance
     }
     fn evaluate(&self, state: &VectorN<MyType, U4>) -> VectorN<MyType, U2> {

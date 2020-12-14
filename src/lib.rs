@@ -1,4 +1,3 @@
-#![cfg_attr(not(feature = "std"), no_std)]
 //! Kalman filter and Rauch-Tung-Striebel smoothing implementation
 //!
 //! Characteristics:
@@ -20,6 +19,9 @@
 //  - See http://www.anuncommonlab.com/articles/how-kalman-filters-work/part2.html
 //  - See https://stats.stackexchange.com/questions/67262/non-overlapping-state-and-measurement-covariances-in-kalman-filter/292690
 //  - https://en.wikipedia.org/wiki/Kalman_filter#Square_root_form
+
+#![cfg_attr(not(feature = "std"), no_std)]
+#![allow(non_snake_case)]
 
 #[cfg(debug_assertions)]
 use approx::assert_relative_eq;
@@ -87,18 +89,44 @@ where
     DefaultAllocator: Allocator<R, SS, SS>,
     DefaultAllocator: Allocator<R, SS>,
 {
-    /// Get the state transition model.
-    fn transition_model(&self) -> &MatrixN<R, SS>;
-    /// Get the transpose of the state transition model.
-    fn transition_model_transpose(&self) -> &MatrixN<R, SS>;
+    /// Get the state transition model, `F`.
+    fn F(&self) -> &MatrixN<R, SS>;
+
+    /// Get the state transition model, `F`.
+    #[deprecated(since = "0.5.0", note = "Please use the F function instead")]
+    #[inline]
+    fn transition_model(&self) -> &MatrixN<R, SS> {
+        self.F()
+    }
+
+    /// Get the transpose of the state transition model, `FT`.
+
+    fn FT(&self) -> &MatrixN<R, SS>;
+
+    /// Get the transpose of the state transition model, `FT`.
+    #[deprecated(since = "0.5.0", note = "Please use the FT function instead")]
+    #[inline]
+    fn transition_model_transpose(&self) -> &MatrixN<R, SS> {
+        self.FT()
+    }
+
+    /// Get the process covariance, `Q`.
+    fn Q(&self) -> &MatrixN<R, SS>;
+
     /// Get the transition noise covariance.
-    fn transition_noise_covariance(&self) -> &MatrixN<R, SS>;
-    /// Predict new state from old state.
+    #[deprecated(since = "0.5.0", note = "Please use the Q function instead")]
+    #[inline]
+    fn transition_noise_covariance(&self) -> &MatrixN<R, SS> {
+        self.Q()
+    }
+
+    /// Predict new state from previous estimate.
     fn predict(&self, previous_estimate: &StateAndCovariance<R, SS>) -> StateAndCovariance<R, SS> {
-        let state = self.transition_model() * previous_estimate.state();
-        let covariance = ((self.transition_model() * previous_estimate.covariance())
-            * self.transition_model_transpose())
-            + self.transition_noise_covariance();
+        // The prior.
+        let P = previous_estimate.state();
+        let F = self.F();
+        let state = F * P;
+        let covariance = ((F * previous_estimate.covariance()) * self.FT()) + self.Q();
         StateAndCovariance::new(state, covariance)
     }
 }
@@ -130,14 +158,36 @@ where
     /// observations.
     fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS>;
 
-    /// Get the observation model
-    fn observation_matrix(&self) -> &MatrixMN<R, OS, SS>;
-    /// Get the transpose of the observation model.
-    fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS>;
+    /// Get the observation model, `H`.
+    fn H(&self) -> &MatrixMN<R, OS, SS>;
 
-    /// Get the observation noise covariance.
+    /// Get the observation model, `H`.
+    #[deprecated(since = "0.5.0", note = "Please use the H function instead")]
+    #[inline]
+    fn observation_matrix(&self) -> &MatrixMN<R, OS, SS> {
+        self.H()
+    }
+
+    /// Get the transpose of the observation model, `HT`.
+    fn HT(&self) -> &MatrixMN<R, SS, OS>;
+
+    /// Get the transpose of the observation model, `HT`.
+    #[deprecated(since = "0.5.0", note = "Please use the HT function instead")]
+    #[inline]
+    fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS> {
+        self.HT()
+    }
+
+    /// Get the observation noise covariance, `R`.
     // TODO: ensure this is positive definite?
-    fn observation_noise_covariance(&self) -> &MatrixN<R, OS>;
+    fn R(&self) -> &MatrixN<R, OS>;
+
+    /// Get the observation noise covariance, `R`.
+    #[deprecated(since = "0.5.0", note = "Please use the R function instead")]
+    #[inline]
+    fn observation_noise_covariance(&self) -> &MatrixN<R, OS> {
+        self.R()
+    }
 
     /// Given a prior state and an observation, compute a posterior state estimate.
     fn update(
@@ -146,18 +196,17 @@ where
         observation: &VectorN<R, OS>,
         covariance_method: CoverianceUpdateMethod,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
-        // Use conventional (e.g. wikipedia) names for these variables
-        let h = self.observation_matrix();
+        let h = self.H();
         trace!("h {}", pretty_print!(h));
 
         let p = prior.covariance();
         trace!("p {}", pretty_print!(p));
         debug_assert_symmetric!(p);
 
-        let ht = self.observation_matrix_transpose();
+        let ht = self.HT();
         trace!("ht {}", pretty_print!(ht));
 
-        let r = self.observation_noise_covariance();
+        let r = self.R();
         trace!("r {}", pretty_print!(r));
 
         // Calculate innovation covariance
@@ -194,11 +243,8 @@ where
         let state: VectorN<R, SS> = prior.state() + &k_gain * innovation;
         trace!("state {}", pretty_print!(state));
 
-        trace!(
-            "self.observation_matrix() {}",
-            pretty_print!(self.observation_matrix())
-        );
-        let kh: MatrixN<R, SS> = &k_gain * self.observation_matrix();
+        trace!("self.observation_matrix() {}", pretty_print!(self.H()));
+        let kh: MatrixN<R, SS> = &k_gain * self.H();
         trace!("kh {}", pretty_print!(kh));
         let one_minus_kh = MatrixN::<R, SS>::one() - kh;
         trace!("one_minus_kh {}", pretty_print!(one_minus_kh));
@@ -453,8 +499,7 @@ where
         );
 
         // J = dot(Vfilt, dot(A.T, inv(Vpred)))  # smoother gain matrix
-        let j = filt.covariance()
-            * (self.transition_model.transition_model_transpose() * inv_prior_covariance);
+        let j = filt.covariance() * (self.transition_model.FT() * inv_prior_covariance);
 
         // xsmooth = xfilt + dot(J, xsmooth_future - xpred)
         let residuals = smooth_future.state() - prior.state();
