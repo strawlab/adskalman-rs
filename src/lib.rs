@@ -270,6 +270,13 @@ where
     DefaultAllocator: Allocator<R, OS>,
     DefaultAllocator: Allocator<(usize, usize), OS>,
 {
+    /// Initialize a new `KalmanFilterNoControl` struct.
+    ///
+    /// The first parameter, `transition_model`, specifies the state transition
+    /// model, including the function `F` and the process covariance `Q`. The
+    /// second parameter, `observation_matrix`, specifies the observation model,
+    /// including the measurement function `H` and the measurement covariance
+    /// `R`.
     pub fn new(
         transition_model: &'a dyn TransitionModelLinearNoControl<R, SS>,
         observation_matrix: &'a dyn ObservationModelLinear<R, SS, OS>,
@@ -287,11 +294,13 @@ where
     /// the posterior without performing the update step.
     ///
     /// This calls the prediction step of the transition model and then, if
-    /// there is a (non-`nan`) observation, calls the update step of the observation
-    /// model using the `CoverianceUpdateMethod::OptimalKalmanForcedSymmetric`
-    /// covariance update method.
+    /// there is a (non-`nan`) observation, calls the update step of the
+    /// observation model using the
+    /// `CoverianceUpdateMethod::OptimalKalmanForcedSymmetric` covariance update
+    /// method.
     ///
-    /// This is a convenience method calling [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options)
+    /// This is a convenience method that calls
+    /// [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options).
     pub fn step(
         &self,
         previous_estimate: &StateAndCovariance<R, SS>,
@@ -330,9 +339,11 @@ where
 
     /// Kalman filter (operates on in-place data without allocating)
     ///
-    /// Operates on entire time series in one shot and returns a vector of state
-    /// estimates. To be mathematically correct, the interval between
-    /// observations must be the `dt` specified in the motion model.
+    /// Operates on entire time series (by repeatedly calling
+    /// [`step`](struct.KalmanFilterNoControl.html#method.step) for each
+    /// observation) and returns a vector of state estimates. To be
+    /// mathematically correct, the interval between observations must be the
+    /// `dt` specified in the motion model.
     ///
     /// If any observation has a NaN component, it is treated as missing.
     pub fn filter_inplace(
@@ -374,6 +385,13 @@ where
 
     /// Rauch-Tung-Striebel (RTS) smoother
     ///
+    /// Operates on entire time series (by calling
+    /// [`filter`](struct.KalmanFilterNoControl.html#method.filter) then
+    /// [`smooth_from_filtered`](struct.KalmanFilterNoControl.html#method.smooth_from_filtered))
+    /// and returns a vector of state estimates. To be mathematically correct,
+    /// the interval between observations must be the `dt` specified in the
+    /// motion model.
+
     /// Operates on entire time series in one shot and returns a vector of state
     /// estimates. To be mathematically correct, the interval between
     /// observations must be the `dt` specified in the motion model.
