@@ -2,7 +2,7 @@ use na::allocator::Allocator;
 use na::dimension::DimMin;
 use na::dimension::{U2, U4};
 use na::{DefaultAllocator, RealField};
-use na::{MatrixMN, MatrixN, VectorN};
+use na::{MatrixMN, MatrixN};
 use nalgebra as na;
 
 use adskalman::ObservationModel;
