@@ -62,7 +62,4 @@ where
     fn R(&self) -> &MatrixN<R, U2> {
         &self.observation_noise_covariance
     }
-    fn evaluate(&self, state: &VectorN<R, U4>) -> VectorN<R, U2> {
-        &self.observation_matrix * state
-    }
 }

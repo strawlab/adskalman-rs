@@ -82,7 +82,7 @@ where
     fn R(&self) -> &MatrixN<MyType, U2> {
         &self.observation_noise_covariance
     }
-    fn evaluate(&self, state: &VectorN<MyType, U4>) -> VectorN<MyType, U2> {
+    fn predict_observation(&self, state: &VectorN<MyType, U4>) -> VectorN<MyType, U2> {
         (*self.evaluation_func)(state)
     }
 }
@@ -129,7 +129,7 @@ fn main() -> Result<(), anyhow::Error> {
         let noise_sample: MatrixMN<MyType, U1, U2> =
             rand_mvn(&zero2, observation_model.observation_noise_covariance).unwrap();
         let noise_sample_col = noise_sample.transpose();
-        let current_observation = observation_model.evaluate(current_state) + noise_sample_col;
+        let current_observation = observation_model.predict_observation(current_state) + noise_sample_col;
         observation.push(current_observation);
     }
 

@@ -150,12 +150,16 @@ where
 {
     /// For a given state, predict the observation.
     ///
+    /// The default implementation implements a linear observation model. For a
+    /// non-linear observation model, any implementation of this trait should
+    /// provide an implementation of this method.
+    ///
     /// If an observation is not possible, this returns NaN values. (This
     /// happens, for example, when a non-linear observation model implements
     /// this trait and must be evaluated for a state for which no observation is
     /// possible.) Observations with NaN values are treated as missing
     /// observations.
-    fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS> {
+    fn predict_observation(&self, state: &VectorN<R, SS>) -> VectorN<R, OS> {
         self.H() * state
     }
 
@@ -215,7 +219,7 @@ where
         // let k_gain: MatrixMN<R,SS,OS> = solve!( (p*ht), s );
         trace!("k_gain {}", pretty_print!(k_gain));
 
-        let predicted: VectorN<R, OS> = self.evaluate(prior.state());
+        let predicted: VectorN<R, OS> = self.predict_observation(prior.state());
         trace!("predicted {}", pretty_print!(predicted));
         trace!("observation {}", pretty_print!(observation));
         let innovation: VectorN<R, OS> = observation - predicted;
@@ -275,6 +279,20 @@ where
     fn observation_noise_covariance(&self) -> &MatrixN<R, OS> {
         self.R()
     }
+
+    /// For a given state, predict the observation.
+    ///
+    /// If an observation is not possible, this returns NaN values. (This
+    /// happens, for example, when a non-linear observation model implements
+    /// this trait and must be evaluated for a state for which no observation is
+    /// possible.) Observations with NaN values are treated as missing
+    /// observations.
+    #[deprecated(since = "0.5.0", note = "Please use the predict_observation function instead")]
+    #[inline]
+    fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS> {
+        self.predict_observation(state)
+    }
+
 }
 
 /// Specifies the approach used for updating the covariance matrix
