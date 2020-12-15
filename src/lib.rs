@@ -132,9 +132,11 @@ where
 
 /// An observation model, potentially non-linear.
 ///
-/// Note, to use a non-linear observation model, the non-linear model must
-/// be linearized (using the prior state estimate) and use this linearization
-/// as the basis for a `ObservationModel` implementation.
+/// To use a non-linear observation model, the non-linear model must be
+/// linearized (e.g. using the prior state estimate) and use this linearization
+/// as the basis for a `ObservationModel` implementation. This would be done
+/// every timestep. For an example, see
+/// [`nonlinear_observation.rs`](https://github.com/strawlab/adskalman-rs/blob/main/examples/src/bin/nonlinear_observation.rs).
 pub trait ObservationModel<R, SS, OS>
 where
     R: RealField,
@@ -150,9 +152,11 @@ where
 {
     /// For a given state, predict the observation.
     ///
-    /// The default implementation implements a linear observation model. For a
-    /// non-linear observation model, any implementation of this trait should
-    /// provide an implementation of this method.
+    /// The default implementation implements a linear observation model, namely
+    /// `y = Hx` where `y` is the predicted observation, `H` is the observation
+    /// matrix, and `x` is the state. For a non-linear observation model, any
+    /// implementation of this trait should provide an implementation of this
+    /// method.
     ///
     /// If an observation is not possible, this returns NaN values. (This
     /// happens, for example, when a non-linear observation model implements
@@ -163,17 +167,19 @@ where
         self.H() * state
     }
 
-    /// Get the observation model, `H`.
+    /// Get the observation matrix, `H`.
     fn H(&self) -> &MatrixMN<R, OS, SS>;
 
-    /// Get the transpose of the observation model, `HT`.
+    /// Get the transpose of the observation matrix, `HT`.
     fn HT(&self) -> &MatrixMN<R, SS, OS>;
 
     /// Get the observation noise covariance, `R`.
     // TODO: ensure this is positive definite?
     fn R(&self) -> &MatrixN<R, OS>;
 
-    /// Given a prior state and an observation, compute a posterior state estimate.
+    /// Given prior state and observation, estimate the posterior state.
+    ///
+    /// This is the *update* step in the Kalman filter literature.
     fn update(
         &self,
         prior: &StateAndCovariance<R, SS>,
@@ -259,14 +265,14 @@ where
         Ok(StateAndCovariance::new(state, covariance))
     }
 
-    /// Get the observation model, `H`.
+    /// Get the observation matrix, `H`.
     #[deprecated(since = "0.5.0", note = "Please use the H function instead")]
     #[inline]
     fn observation_matrix(&self) -> &MatrixMN<R, OS, SS> {
         self.H()
     }
 
-    /// Get the transpose of the observation model, `HT`.
+    /// Get the transpose of the observation matrix, `HT`.
     #[deprecated(since = "0.5.0", note = "Please use the HT function instead")]
     #[inline]
     fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS> {
