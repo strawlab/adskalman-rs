@@ -14,7 +14,7 @@ categories = ["algorithms", "no-std", "science", "science::robotics"]
 nalgebra = {version="0.23", default-features=false, features=["libm"]}
 num-traits = {version="0.2", default-features=false}
 log = { version = "0.4", optional=true }
-itertools = {version="0.9", default-features=false}
+itertools = {version="0.10", default-features=false}
 approx = {version="0.4", default-features=false}
 
 [features]
