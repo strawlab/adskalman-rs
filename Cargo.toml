@@ -1,7 +1,7 @@
 [package]
 name = "adskalman"
 repository = "https://github.com/strawlab/adskalman-rs"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
 description = "Kalman filter and Rauch-Tung-Striebel smoothing implementation using nalgebra, no_std"
