@@ -1,6 +1,6 @@
 use na::allocator::Allocator;
 use na::dimension::{U2, U4};
-use na::MatrixN;
+use na::OMatrix;
 use na::{DefaultAllocator, RealField};
 use nalgebra as na;
 
@@ -15,9 +15,9 @@ where
     DefaultAllocator: Allocator<R, U4, U4>,
     DefaultAllocator: Allocator<R, U4>,
 {
-    pub transition_model: MatrixN<R, U4>,
-    pub transition_model_transpose: MatrixN<R, U4>,
-    pub transition_noise_covariance: MatrixN<R, U4>,
+    pub transition_model: OMatrix<R, U4, U4>,
+    pub transition_model_transpose: OMatrix<R, U4, U4>,
+    pub transition_noise_covariance: OMatrix<R, U4, U4>,
 }
 
 impl<R> ConstantVelocity2DModel<R>
@@ -30,7 +30,7 @@ where
         let zero = na::convert(0.0);
         // Create transition model. 2D position and 2D velocity.
         #[rustfmt::skip]
-        let transition_model = MatrixN::<R,U4>::new(one, zero,  dt, zero,
+        let transition_model = OMatrix::<R,U4,U4>::new(one, zero,  dt, zero,
                             zero, one, zero,  dt,
                             zero, zero, one, zero,
                             zero, zero, zero, one);
@@ -44,7 +44,7 @@ where
         let t33 = dt * dt * dt / na::convert(3.0);
         let t22 = dt * dt / na::convert(2.0);
         #[rustfmt::skip]
-        let transition_noise_covariance = MatrixN::<R,U4>::new(t33, zero, t22, zero,
+        let transition_noise_covariance = OMatrix::<R,U4,U4>::new(t33, zero, t22, zero,
                                         zero, t33, zero, t22,
                                         t22, zero, dt, zero,
                                         zero, t22, zero, dt)*noise_scale;
@@ -65,13 +65,13 @@ where
     DefaultAllocator: Allocator<R, U2, U2>,
     DefaultAllocator: Allocator<R, U4>,
 {
-    fn transition_model(&self) -> &MatrixN<R, U4> {
+    fn transition_model(&self) -> &OMatrix<R, U4, U4> {
         &self.transition_model
     }
-    fn transition_model_transpose(&self) -> &MatrixN<R, U4> {
+    fn transition_model_transpose(&self) -> &OMatrix<R, U4, U4> {
         &self.transition_model_transpose
     }
-    fn transition_noise_covariance(&self) -> &MatrixN<R, U4> {
+    fn transition_noise_covariance(&self) -> &OMatrix<R, U4, U4> {
         &self.transition_noise_covariance
     }
 }

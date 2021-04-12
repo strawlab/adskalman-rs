@@ -1,6 +1,6 @@
 use na::allocator::Allocator;
 use na::{DefaultAllocator, DimName, RealField};
-use na::{MatrixN, VectorN};
+use na::{OMatrix, OVector};
 use nalgebra as na;
 
 /// State and covariance pair for a given estimate
@@ -12,8 +12,8 @@ where
     DefaultAllocator: Allocator<R, SS, SS>,
     DefaultAllocator: Allocator<R, SS>,
 {
-    state: VectorN<R, SS>,
-    covariance: MatrixN<R, SS>,
+    state: OVector<R, SS>,
+    covariance: OMatrix<R, SS, SS>,
 }
 
 impl<R, SS> StateAndCovariance<R, SS>
@@ -27,7 +27,7 @@ where
     ///
     /// It is assumed that the covariance matrix is symmetric and positive
     /// semi-definite.
-    pub fn new(state: VectorN<R, SS>, covariance: MatrixN<R, SS>) -> Self {
+    pub fn new(state: OVector<R, SS>, covariance: OMatrix<R, SS, SS>) -> Self {
         // In theory, checks could be run to ensure the covariance matrix is
         // both symmetric and positive semi-definite. The Cholesky decomposition
         // could be used to test if it is positive definite. However, matrices
@@ -43,11 +43,11 @@ where
         Self { state, covariance }
     }
     #[inline]
-    pub fn state(&self) -> &VectorN<R, SS> {
+    pub fn state(&self) -> &OVector<R, SS> {
         &self.state
     }
     #[inline]
-    pub fn covariance(&self) -> &MatrixN<R, SS> {
+    pub fn covariance(&self) -> &OMatrix<R, SS, SS> {
         &self.covariance
     }
 }

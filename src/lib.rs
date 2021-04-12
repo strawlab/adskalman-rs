@@ -25,7 +25,7 @@
 use approx::assert_relative_eq;
 #[cfg(feature = "std")]
 use log::trace;
-use na::{MatrixMN, MatrixN, VectorN};
+use na::{OMatrix, OVector};
 use nalgebra as na;
 use nalgebra::base::dimension::DimMin;
 
@@ -88,11 +88,11 @@ where
     DefaultAllocator: Allocator<R, SS>,
 {
     /// Get the state transition model.
-    fn transition_model(&self) -> &MatrixN<R, SS>;
+    fn transition_model(&self) -> &OMatrix<R, SS, SS>;
     /// Get the transpose of the state transition model.
-    fn transition_model_transpose(&self) -> &MatrixN<R, SS>;
+    fn transition_model_transpose(&self) -> &OMatrix<R, SS, SS>;
     /// Get the transition noise covariance.
-    fn transition_noise_covariance(&self) -> &MatrixN<R, SS>;
+    fn transition_noise_covariance(&self) -> &OMatrix<R, SS, SS>;
     /// Predict new state from old state.
     fn predict(&self, previous_estimate: &StateAndCovariance<R, SS>) -> StateAndCovariance<R, SS> {
         let state = self.transition_model() * previous_estimate.state();
@@ -128,22 +128,22 @@ where
     /// this trait and must be evaluated for a state for which no observation is
     /// possible.) Observations with NaN values are treated as missing
     /// observations.
-    fn evaluate(&self, state: &VectorN<R, SS>) -> VectorN<R, OS>;
+    fn evaluate(&self, state: &OVector<R, SS>) -> OVector<R, OS>;
 
     /// Get the observation model
-    fn observation_matrix(&self) -> &MatrixMN<R, OS, SS>;
+    fn observation_matrix(&self) -> &OMatrix<R, OS, SS>;
     /// Get the transpose of the observation model.
-    fn observation_matrix_transpose(&self) -> &MatrixMN<R, SS, OS>;
+    fn observation_matrix_transpose(&self) -> &OMatrix<R, SS, OS>;
 
     /// Get the observation noise covariance.
     // TODO: ensure this is positive definite?
-    fn observation_noise_covariance(&self) -> &MatrixN<R, OS>;
+    fn observation_noise_covariance(&self) -> &OMatrix<R, OS, OS>;
 
     /// Given a prior state and an observation, compute a posterior state estimate.
     fn update(
         &self,
         prior: &StateAndCovariance<R, SS>,
-        observation: &VectorN<R, OS>,
+        observation: &OVector<R, OS>,
         covariance_method: CoverianceUpdateMethod,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
         // Use conventional (e.g. wikipedia) names for these variables
@@ -179,31 +179,31 @@ where
                 return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
             }
         };
-        let s_inv: MatrixMN<R, OS, OS> = s_chol.inverse();
+        let s_inv: OMatrix<R, OS, OS> = s_chol.inverse();
         trace!("s_inv {}", pretty_print!(s_inv));
 
-        let k_gain: MatrixMN<R, SS, OS> = p * ht * s_inv;
-        // let k_gain: MatrixMN<R,SS,OS> = solve!( (p*ht), s );
+        let k_gain: OMatrix<R, SS, OS> = p * ht * s_inv;
+        // let k_gain: OMatrix<R,SS,OS> = solve!( (p*ht), s );
         trace!("k_gain {}", pretty_print!(k_gain));
 
-        let predicted: VectorN<R, OS> = self.evaluate(prior.state());
+        let predicted: OVector<R, OS> = self.evaluate(prior.state());
         trace!("predicted {}", pretty_print!(predicted));
         trace!("observation {}", pretty_print!(observation));
-        let innovation: VectorN<R, OS> = observation - predicted;
+        let innovation: OVector<R, OS> = observation - predicted;
         trace!("innovation {}", pretty_print!(innovation));
-        let state: VectorN<R, SS> = prior.state() + &k_gain * innovation;
+        let state: OVector<R, SS> = prior.state() + &k_gain * innovation;
         trace!("state {}", pretty_print!(state));
 
         trace!(
             "self.observation_matrix() {}",
             pretty_print!(self.observation_matrix())
         );
-        let kh: MatrixN<R, SS> = &k_gain * self.observation_matrix();
+        let kh: OMatrix<R, SS, SS> = &k_gain * self.observation_matrix();
         trace!("kh {}", pretty_print!(kh));
-        let one_minus_kh = MatrixN::<R, SS>::one() - kh;
+        let one_minus_kh = OMatrix::<R, SS, SS>::one() - kh;
         trace!("one_minus_kh {}", pretty_print!(one_minus_kh));
 
-        let covariance: MatrixN<R, SS> = match covariance_method {
+        let covariance: OMatrix<R, SS, SS> = match covariance_method {
             CoverianceUpdateMethod::JosephForm => {
                 // Joseph form of covariance update keeps covariance matrix symmetric.
 
@@ -304,7 +304,7 @@ where
     pub fn step(
         &self,
         previous_estimate: &StateAndCovariance<R, SS>,
-        observation: &VectorN<R, OS>,
+        observation: &OVector<R, OS>,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
         self.step_with_options(
             previous_estimate,
@@ -325,7 +325,7 @@ where
     pub fn step_with_options(
         &self,
         previous_estimate: &StateAndCovariance<R, SS>,
-        observation: &VectorN<R, OS>,
+        observation: &OVector<R, OS>,
         covariance_update_method: CoverianceUpdateMethod,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
         let prior = self.transition_model.predict(previous_estimate);
@@ -349,7 +349,7 @@ where
     pub fn filter_inplace(
         &self,
         initial_estimate: &StateAndCovariance<R, SS>,
-        observations: &[VectorN<R, OS>],
+        observations: &[OVector<R, OS>],
         state_estimates: &mut [StateAndCovariance<R, SS>],
     ) -> Result<(), Error> {
         let mut previous_estimate = initial_estimate.clone();
@@ -372,10 +372,10 @@ where
     pub fn filter(
         &self,
         initial_estimate: &StateAndCovariance<R, SS>,
-        observations: &[VectorN<R, OS>],
+        observations: &[OVector<R, OS>],
     ) -> Result<Vec<StateAndCovariance<R, SS>>, Error> {
         let mut state_estimates = Vec::with_capacity(observations.len());
-        let empty = StateAndCovariance::new(na::zero(), na::MatrixN::<R, SS>::identity());
+        let empty = StateAndCovariance::new(na::zero(), na::OMatrix::<R, SS, SS>::identity());
         for _ in 0..observations.len() {
             state_estimates.push(empty.clone());
         }
@@ -401,7 +401,7 @@ where
     pub fn smooth(
         &self,
         initial_estimate: &StateAndCovariance<R, SS>,
-        observations: &[VectorN<R, OS>],
+        observations: &[OVector<R, OS>],
     ) -> Result<Vec<StateAndCovariance<R, SS>>, Error> {
         let forward_results = self.filter(initial_estimate, observations)?;
         self.smooth_from_filtered(forward_results)
@@ -446,7 +446,7 @@ where
                 return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
             }
         };
-        let inv_prior_covariance: MatrixMN<R, SS, SS> = v_chol.inverse();
+        let inv_prior_covariance: OMatrix<R, SS, SS> = v_chol.inverse();
         trace!(
             "inv_prior_covariance {}",
             pretty_print!(inv_prior_covariance)
