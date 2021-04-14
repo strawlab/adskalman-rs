@@ -1,4 +1,4 @@
-# unreleased
+# 0.8.0 (April 14, 2021)
 
 ### Changed
 
