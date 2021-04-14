@@ -1,16 +1,16 @@
 use na::dimension::{U2, U4};
+use na::OVector;
 use na::RealField;
-use na::VectorN;
 use nalgebra as na;
 
 // print to csv --------
 
 #[allow(dead_code)]
 pub fn print_csv<R: RealField>(
-    times: &Vec<R>,
-    state: &Vec<VectorN<R, U4>>,
-    observation: &Vec<VectorN<R, U2>>,
-    state_estimates: &Vec<VectorN<R, U4>>,
+    times: &[R],
+    state: &[OVector<R, U4>],
+    observation: &[OVector<R, U2>],
+    state_estimates: &[OVector<R, U4>],
 ) {
     assert_eq!(times.len(), state.len());
     assert_eq!(times.len(), observation.len());
