@@ -7,10 +7,10 @@ use nalgebra as na;
 
 #[allow(dead_code)]
 pub fn print_csv<R: RealField>(
-    times: &Vec<R>,
-    state: &Vec<OVector<R, U4>>,
-    observation: &Vec<OVector<R, U2>>,
-    state_estimates: &Vec<OVector<R, U4>>,
+    times: &[R],
+    state: &[OVector<R, U4>],
+    observation: &[OVector<R, U2>],
+    state_estimates: &[OVector<R, U4>],
 ) {
     assert_eq!(times.len(), state.len());
     assert_eq!(times.len(), observation.len());

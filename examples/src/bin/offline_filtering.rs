@@ -30,18 +30,18 @@ fn main() -> Result<(), anyhow::Error> {
     let kf = KalmanFilterNoControl::new(&motion_model, &observation_model);
 
     // Create some fake data with our model.
-    let mut current_state = true_initial_state.clone();
+    let mut current_state = true_initial_state;
     let mut state = vec![];
     let mut times = vec![];
     let zero4 = Vector4::<MyType>::zeros();
     let mut cur_time = 0.0;
     while cur_time < 0.5 {
-        times.push(cur_time.clone());
-        state.push(current_state.clone());
+        times.push(cur_time);
+        state.push(current_state);
         let noise_sample: OMatrix<MyType, U1, U4> =
             rand_mvn(&zero4, motion_model.transition_noise_covariance).unwrap();
         let noise_sample_col: OVector<MyType, U4> = noise_sample.transpose();
-        current_state = motion_model.transition_model * &current_state + noise_sample_col;
+        current_state = motion_model.transition_model * current_state + noise_sample_col;
         cur_time += dt;
     }
 
@@ -62,7 +62,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     let mut state_estimates = vec![];
     for this_estimate in estimates.iter() {
-        state_estimates.push(this_estimate.state().clone());
+        state_estimates.push(*this_estimate.state());
     }
     print_csv::print_csv(&times, &state, &observation, &state_estimates);
     Ok(())
