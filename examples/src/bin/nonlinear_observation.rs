@@ -6,7 +6,7 @@ use na::{OMatrix, OVector, Vector2, Vector4};
 use nalgebra as na;
 use nalgebra_rand_mvn::rand_mvn;
 
-use adskalman::{KalmanFilterNoControl, ObservationModelLinear};
+use adskalman::{KalmanFilterNoControl, ObservationModel};
 use adskalman_examples::motion_model;
 use adskalman_examples::print_csv;
 
@@ -30,7 +30,7 @@ impl NonlinearObservationModel {
             OVector::<MyType, U2>::new(state.x * state.x * state.x, state.x * state.y)
         };
 
-        // Create observation model. We only observe the position.
+        // Create Jacobian of the observation model. We only observe the position.
         #[rustfmt::skip]
         let observation_matrix = OMatrix::<MyType, U2, U4>::new(
             3.0 * state.x * state.x, 0.0, 0.0, 0.0,
@@ -64,7 +64,7 @@ where
     observation_noise_covariance: OMatrix<MyType, U2, U2>,
 }
 
-impl ObservationModelLinear<MyType, U4, U2> for LinearizedObservationModel
+impl ObservationModel<MyType, U4, U2> for LinearizedObservationModel
 where
     DefaultAllocator: Allocator<MyType, U4, U4>,
     DefaultAllocator: Allocator<MyType, U2, U4>,
@@ -75,16 +75,16 @@ where
     DefaultAllocator: Allocator<(usize, usize), U2>,
     U2: DimMin<U2, Output = U2>,
 {
-    fn observation_matrix(&self) -> &OMatrix<MyType, U2, U4> {
+    fn H(&self) -> &OMatrix<MyType, U2, U4> {
         &self.observation_matrix
     }
-    fn observation_matrix_transpose(&self) -> &OMatrix<MyType, U4, U2> {
+    fn HT(&self) -> &OMatrix<MyType, U4, U2> {
         &self.observation_matrix_transpose
     }
-    fn observation_noise_covariance(&self) -> &OMatrix<MyType, U2, U2> {
+    fn R(&self) -> &OMatrix<MyType, U2, U2> {
         &self.observation_noise_covariance
     }
-    fn evaluate(&self, state: &OVector<MyType, U4>) -> OVector<MyType, U2> {
+    fn predict_observation(&self, state: &OVector<MyType, U4>) -> OVector<MyType, U2> {
         (*self.evaluation_func)(state)
     }
 }
@@ -131,7 +131,8 @@ fn main() -> Result<(), anyhow::Error> {
         let noise_sample: OMatrix<MyType, U1, U2> =
             rand_mvn(&zero2, observation_model.observation_noise_covariance).unwrap();
         let noise_sample_col = noise_sample.transpose();
-        let current_observation = observation_model.evaluate(current_state) + noise_sample_col;
+        let current_observation =
+            observation_model.predict_observation(current_state) + noise_sample_col;
         observation.push(current_observation);
     }
 

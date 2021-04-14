@@ -1,11 +1,11 @@
 use na::allocator::Allocator;
 use na::dimension::DimMin;
 use na::dimension::{U2, U4};
+use na::OMatrix;
 use na::{DefaultAllocator, RealField};
-use na::{OMatrix, OVector};
 use nalgebra as na;
 
-use adskalman::ObservationModelLinear;
+use adskalman::ObservationModel;
 
 // observation model -------
 
@@ -42,7 +42,7 @@ impl<R: RealField> PositionObservationModel<R> {
     }
 }
 
-impl<R: RealField> ObservationModelLinear<R, U4, U2> for PositionObservationModel<R>
+impl<R: RealField> ObservationModel<R, U4, U2> for PositionObservationModel<R>
 where
     DefaultAllocator: Allocator<R, U4, U4>,
     DefaultAllocator: Allocator<R, U2, U4>,
@@ -53,16 +53,13 @@ where
     DefaultAllocator: Allocator<(usize, usize), U2>,
     U2: DimMin<U2, Output = U2>,
 {
-    fn observation_matrix(&self) -> &OMatrix<R, U2, U4> {
+    fn H(&self) -> &OMatrix<R, U2, U4> {
         &self.observation_matrix
     }
-    fn observation_matrix_transpose(&self) -> &OMatrix<R, U4, U2> {
+    fn HT(&self) -> &OMatrix<R, U4, U2> {
         &self.observation_matrix_transpose
     }
-    fn observation_noise_covariance(&self) -> &OMatrix<R, U2, U2> {
+    fn R(&self) -> &OMatrix<R, U2, U2> {
         &self.observation_noise_covariance
-    }
-    fn evaluate(&self, state: &OVector<R, U4>) -> OVector<R, U2> {
-        &self.observation_matrix * state
     }
 }
