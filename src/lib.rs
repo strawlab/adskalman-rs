@@ -470,17 +470,7 @@ where
 
 #[inline]
 fn is_nan<R: RealField>(x: R) -> bool {
-    // Why isn't this implemented for RealField directly?
-    let zero = R::zero();
-    if x < zero {
-        false
-    } else {
-        if x >= zero {
-            false
-        } else {
-            true
-        }
-    }
+    x.partial_cmp(&R::zero()).is_none()
 }
 
 #[test]

@@ -25,7 +25,7 @@ impl NonlinearObservationModel {
         Self {}
     }
     /// Construct a new `LinearizedObservationModel` by linearizing around `state`.
-    fn linearize_at(&self, state: &OVector<MyType, U4>) -> Result<LinearizedObservationModel, ()> {
+    fn linearize_at(&self, state: &OVector<MyType, U4>) -> LinearizedObservationModel {
         let evaluation_func = |state: &OVector<MyType, U4>| {
             OVector::<MyType, U2>::new(state.x * state.x * state.x, state.x * state.y)
         };
@@ -39,14 +39,16 @@ impl NonlinearObservationModel {
         let observation_matrix_transpose = observation_matrix.transpose();
         let observation_noise_covariance = OMatrix::<MyType, U2, U2>::new(0.01, 0.0, 0.0, 0.01);
 
-        Ok(LinearizedObservationModel {
+        LinearizedObservationModel {
             evaluation_func: Box::new(evaluation_func),
             observation_matrix,
             observation_matrix_transpose,
             observation_noise_covariance,
-        })
+        }
     }
 }
+
+type EvaluationFn = Box<dyn Fn(&OVector<MyType, U4>) -> OVector<MyType, U2>>;
 
 struct LinearizedObservationModel
 where
@@ -56,7 +58,7 @@ where
     DefaultAllocator: Allocator<MyType, U2, U2>,
     DefaultAllocator: Allocator<MyType, U4>,
 {
-    evaluation_func: Box<dyn Fn(&OVector<MyType, U4>) -> OVector<MyType, U2>>,
+    evaluation_func: EvaluationFn,
     observation_matrix: OMatrix<MyType, U2, U4>,
     observation_matrix_transpose: OMatrix<MyType, U4, U2>,
     observation_noise_covariance: OMatrix<MyType, U2, U2>,
@@ -106,18 +108,18 @@ fn main() -> Result<(), anyhow::Error> {
     let observation_model_gen = NonlinearObservationModel::new();
 
     // Create some fake data with our model.
-    let mut current_state = true_initial_state.clone();
+    let mut current_state = true_initial_state;
     let mut state = vec![];
     let mut times = vec![];
     let zero4 = Vector4::<MyType>::zeros();
     let mut cur_time = 0.0;
     while cur_time < 0.5 {
-        times.push(cur_time.clone());
-        state.push(current_state.clone());
+        times.push(cur_time);
+        state.push(current_state);
         let noise_sample: OMatrix<MyType, U1, U4> =
             rand_mvn(&zero4, motion_model.transition_noise_covariance).unwrap();
         let noise_sample_col: OVector<MyType, U4> = noise_sample.transpose();
-        current_state = motion_model.transition_model * &current_state + noise_sample_col;
+        current_state = motion_model.transition_model * current_state + noise_sample_col;
         cur_time += dt;
     }
 
@@ -125,7 +127,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut observation = vec![];
     let zero2 = Vector2::<MyType>::zeros();
     for current_state in state.iter() {
-        let observation_model = observation_model_gen.linearize_at(&current_state).unwrap();
+        let observation_model = observation_model_gen.linearize_at(&current_state);
         let noise_sample: OMatrix<MyType, U1, U2> =
             rand_mvn(&zero2, observation_model.observation_noise_covariance).unwrap();
         let noise_sample_col = noise_sample.transpose();
@@ -138,13 +140,11 @@ fn main() -> Result<(), anyhow::Error> {
 
     let mut state_estimates = vec![];
     for this_observation in observation.iter() {
-        let observation_model = observation_model_gen
-            .linearize_at(&previous_estimate.state())
-            .unwrap();
+        let observation_model = observation_model_gen.linearize_at(&previous_estimate.state());
         let kf = KalmanFilterNoControl::new(&motion_model, &observation_model);
 
         let this_estimate = kf.step(&previous_estimate, this_observation)?;
-        state_estimates.push(this_estimate.state().clone());
+        state_estimates.push(*this_estimate.state());
         previous_estimate = this_estimate;
     }
     print_csv::print_csv(&times, &state, &observation, &state_estimates);
