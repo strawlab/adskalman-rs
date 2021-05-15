@@ -2,8 +2,19 @@
 
 ### Changed
 
+- Change the default covariance update method to use the Joseph form. This is
+  more numerically robust at the cost of being more computationally expensive.
+  To use the old covariance update method, call
+  `KalmanFilterNoControl::step_with_options()` with argument
+  `covariance_update_method` set to
+  `CovarianceUpdateMethod::OptimalKalmanForcedSymmetric`.
 - Fixed the spelling of `CovarianceUpdateMethod` (which was previously
   misspelled).
+
+### Added
+
+- Implemented tests to run a basic sanity checks for the different covariance
+  update methods.
 
 # 0.8.0 (April 14, 2021)
 

@@ -366,9 +366,8 @@ where
     ///
     /// This calls the prediction step of the transition model and then, if
     /// there is a (non-`nan`) observation, calls the update step of the
-    /// observation model using the
-    /// `CovarianceUpdateMethod::OptimalKalmanForcedSymmetric` covariance update
-    /// method.
+    /// observation model using the `CovarianceUpdateMethod::JosephForm`
+    /// covariance update method.
     ///
     /// This is a convenience method that calls
     /// [step_with_options](struct.KalmanFilterNoControl.html#method.step_with_options).
@@ -380,7 +379,7 @@ where
         self.step_with_options(
             previous_estimate,
             observation,
-            CovarianceUpdateMethod::OptimalKalmanForcedSymmetric,
+            CovarianceUpdateMethod::JosephForm,
         )
     }
 
