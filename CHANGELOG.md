@@ -13,8 +13,8 @@
 
 ### Added
 
-- Implemented tests to run a basic sanity checks for the different covariance
-  update methods.
+- Implemented tests to run basic sanity checks for the Kalman filter (with
+  different covariance update methods) and Kalman smoother.
 
 # 0.8.0 (April 14, 2021)
 
