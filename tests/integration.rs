@@ -255,3 +255,55 @@ fn test_offline_smoothing() {
         }
     }
 }
+
+#[test]
+fn test_offline_smoothing_with_missing_data() {
+    let dt = 0.01;
+    let true_initial_state = OVector::<f64, U4>::new(0.0, 0.0, 10.0, -5.0);
+    #[rustfmt::skip]
+    let initial_covariance = OMatrix::<f64,U4,U4>::new(0.1, 0.0, 0.0, 0.0,
+        0.0, 0.1, 0.0, 0.0,
+        0.0, 0.0, 0.1, 0.0,
+        0.0, 0.0, 0.0, 0.1);
+
+    let motion_model = ConstantVelocity2DModel::new(dt, 100.0);
+    let observation_model = PositionObservationModel::new(0.01);
+    let kf = KalmanFilterNoControl::new(&motion_model, &observation_model);
+
+    let mut observation = vec![];
+    let mut expected = vec![];
+
+    let rdr = csv::Reader::from_reader(SMOOTHED_DATA.as_bytes());
+    for row in rdr.into_deserialize().into_iter() {
+        let row: CsvRow = row.unwrap();
+
+        println!("{:?}", row);
+        let this_observation = OVector::<f64, Const<2>>::new(row.obs_x, row.obs_y);
+        observation.push(this_observation);
+        expected.push(OVector::<f64, Const<4>>::new(
+            row.est_x,
+            row.est_y,
+            row.est_xvel,
+            row.est_yvel,
+        ));
+    }
+
+    assert_eq!(observation.len(), 50);
+    for i in 25..30 {
+        observation[i] = OVector::<f64, Const<2>>::new(std::f64::NAN, std::f64::NAN);
+    }
+
+    let initial_estimate =
+        adskalman::StateAndCovariance::new(true_initial_state, initial_covariance);
+    let actual = kf.smooth(&initial_estimate, &observation).unwrap();
+
+    // We cannot be so precise because some data is missing.
+    let maxerr = 1e-1;
+
+    for (actual_row, expected_row) in actual.iter().zip(expected.iter()) {
+        let this_state = actual_row.state();
+        for i in 0..4 {
+            assert_relative_eq!(this_state[i], expected_row[i], max_relative = maxerr);
+        }
+    }
+}
