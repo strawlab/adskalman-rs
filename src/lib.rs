@@ -251,11 +251,9 @@ where
             CoverianceUpdateMethod::OptimalKalmanForcedSymmetric => {
                 let covariance1 = one_minus_kh * prior.covariance();
                 trace!("covariance1 {}", pretty_print!(covariance1));
-
                 // Hack to force covariance to be symmetric.
                 // See https://math.stackexchange.com/q/2335831
-                let half: R = na::convert(0.5);
-                (&covariance1 + &covariance1.transpose()) * half
+                covariance1.symmetric_part()
             }
         };
         trace!("covariance {}", pretty_print!(covariance));
