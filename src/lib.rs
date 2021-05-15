@@ -4,7 +4,7 @@
 //! - Uses the [nalgebra](https://nalgebra.org) crate for math.
 //! - Supports `no_std` to facilitate running on embedded microcontrollers.
 //! - Includes [various methods of computing the covariance matrix on the update
-//!   step](enum.CoverianceUpdateMethod.html).
+//!   step](enum.CovarianceUpdateMethod.html).
 //! - [Examples](https://github.com/strawlab/adskalman-rs/tree/main/examples)
 //!   included.
 //! - Strong typing used to ensure correct matrix dimensions at compile time.
@@ -184,7 +184,7 @@ where
         &self,
         prior: &StateAndCovariance<R, SS>,
         observation: &OVector<R, OS>,
-        covariance_method: CoverianceUpdateMethod,
+        covariance_method: CovarianceUpdateMethod,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
         let h = self.H();
         trace!("h {}", pretty_print!(h));
@@ -240,15 +240,15 @@ where
         trace!("one_minus_kh {}", pretty_print!(one_minus_kh));
 
         let covariance: OMatrix<R, SS, SS> = match covariance_method {
-            CoverianceUpdateMethod::JosephForm => {
+            CovarianceUpdateMethod::JosephForm => {
                 // Joseph form of covariance update keeps covariance matrix symmetric.
 
                 let left = &one_minus_kh * prior.covariance() * &one_minus_kh.transpose();
                 let right = &k_gain * r * &k_gain.transpose();
                 left + right
             }
-            CoverianceUpdateMethod::OptimalKalman => one_minus_kh * prior.covariance(),
-            CoverianceUpdateMethod::OptimalKalmanForcedSymmetric => {
+            CovarianceUpdateMethod::OptimalKalman => one_minus_kh * prior.covariance(),
+            CovarianceUpdateMethod::OptimalKalmanForcedSymmetric => {
                 let covariance1 = one_minus_kh * prior.covariance();
                 trace!("covariance1 {}", pretty_print!(covariance1));
                 // Hack to force covariance to be symmetric.
@@ -303,7 +303,7 @@ where
 
 /// Specifies the approach used for updating the covariance matrix
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum CoverianceUpdateMethod {
+pub enum CovarianceUpdateMethod {
     /// Assumes optimal Kalman gain.
     ///
     /// Due to numerical errors, covariance matrix may not remain symmetric.
@@ -367,7 +367,7 @@ where
     /// This calls the prediction step of the transition model and then, if
     /// there is a (non-`nan`) observation, calls the update step of the
     /// observation model using the
-    /// `CoverianceUpdateMethod::OptimalKalmanForcedSymmetric` covariance update
+    /// `CovarianceUpdateMethod::OptimalKalmanForcedSymmetric` covariance update
     /// method.
     ///
     /// This is a convenience method that calls
@@ -380,7 +380,7 @@ where
         self.step_with_options(
             previous_estimate,
             observation,
-            CoverianceUpdateMethod::OptimalKalmanForcedSymmetric,
+            CovarianceUpdateMethod::OptimalKalmanForcedSymmetric,
         )
     }
 
@@ -397,7 +397,7 @@ where
         &self,
         previous_estimate: &StateAndCovariance<R, SS>,
         observation: &OVector<R, OS>,
-        covariance_update_method: CoverianceUpdateMethod,
+        covariance_update_method: CovarianceUpdateMethod,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
         let prior = self.transition_model.predict(previous_estimate);
         if observation.iter().any(|x| is_nan(*x)) {

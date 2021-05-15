@@ -1,3 +1,10 @@
+# 0.9.0 (unreleased)
+
+### Changed
+
+- Fixed the spelling of `CovarianceUpdateMethod` (which was previously
+  misspelled).
+
 # 0.8.0 (April 14, 2021)
 
 ### Changed
