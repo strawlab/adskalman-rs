@@ -1,3 +1,7 @@
+# 0.10.0 (June 4, 2021)
+
+The `nalgebra` and `approx` crates have been updated to their latest versions.
+
 # 0.9.0 (May 15, 2021)
 
 ### Changed
