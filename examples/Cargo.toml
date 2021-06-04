@@ -8,7 +8,7 @@ edition = "2018"
 [dependencies]
 nalgebra = "0.27"
 adskalman = {path=".."}
-nalgebra-rand-mvn = {git="https://github.com/strawlab/nalgebra-rand-mvn", rev="731ba663e9d621b1e181b225d4ceae3beeb8d63a"}
+nalgebra-rand-mvn = {git="https://github.com/strawlab/nalgebra-rand-mvn", rev="e3a4528a08aeebce74036402bab42ebe47d4a56f"}
 env_logger = "0.8"
 log = { version = "0.4", features = ["release_max_level_debug"] }
 anyhow = "1.0"
