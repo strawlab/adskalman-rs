@@ -399,7 +399,7 @@ where
         covariance_update_method: CovarianceUpdateMethod,
     ) -> Result<StateAndCovariance<R, SS>, Error> {
         let prior = self.transition_model.predict(previous_estimate);
-        if observation.iter().any(|x| is_nan(*x)) {
+        if observation.iter().any(|x| is_nan(x.clone())) {
             Ok(prior)
         } else {
             self.observation_matrix

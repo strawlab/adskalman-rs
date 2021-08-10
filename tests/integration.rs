@@ -47,7 +47,7 @@ where
 
 impl<R> ConstantVelocity2DModel<R>
 where
-    R: RealField,
+    R: RealField + Copy,
 {
     fn new(dt: R, noise_scale: R) -> Self {
         let one = na::convert(1.0);
@@ -115,7 +115,7 @@ where
     observation_noise_covariance: OMatrix<R, U2, U2>,
 }
 
-impl<R: RealField> PositionObservationModel<R> {
+impl<R: RealField + Copy> PositionObservationModel<R> {
     fn new(var: R) -> Self {
         let one = na::convert(1.0);
         let zero = na::convert(0.0);
