@@ -41,12 +41,29 @@ where
         // not be symmetric and positive semi-definite, test them prior to this.
         Self { state, covariance }
     }
+    /// Get a reference to the state vector.
     #[inline]
     pub fn state(&self) -> &OVector<R, SS> {
         &self.state
     }
+    /// Get a mut reference to the state vector.
+    #[inline]
+    pub fn state_mut(&mut self) -> &mut OVector<R, SS> {
+        &mut self.state
+    }
+    /// Get a reference to the covariance matrix.
     #[inline]
     pub fn covariance(&self) -> &OMatrix<R, SS, SS> {
         &self.covariance
+    }
+    /// Get a mutable reference to the covariance matrix.
+    #[inline]
+    pub fn covariance_mut(&mut self) -> &mut OMatrix<R, SS, SS> {
+        &mut self.covariance
+    }
+    /// Get the state vector and covariance matrix.
+    #[inline]
+    pub fn inner(self) -> (OVector<R, SS>, OMatrix<R, SS, SS>) {
+        (self.state, self.covariance)
     }
 }
