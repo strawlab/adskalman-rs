@@ -1,9 +1,12 @@
-use na::allocator::Allocator;
-use na::dimension::DimMin;
-use na::dimension::{U1, U2, U4};
-use na::DefaultAllocator;
-use na::{OMatrix, OVector, Vector2, Vector4};
 use nalgebra as na;
+
+use na::{
+    allocator::Allocator,
+    dimension::DimMin,
+    dimension::{U2, U4},
+    DefaultAllocator, Matrix1x2, Matrix1x4, Matrix2, Matrix2x4, Matrix4, Matrix4x2, OVector,
+    Vector2, Vector4,
+};
 use nalgebra_rand_mvn::rand_mvn;
 
 use adskalman::{KalmanFilterNoControl, ObservationModel};
@@ -27,17 +30,17 @@ impl NonlinearObservationModel {
     /// Construct a new `LinearizedObservationModel` by linearizing around `state`.
     fn linearize_at(&self, state: &OVector<MyType, U4>) -> LinearizedObservationModel {
         let evaluation_func = |state: &OVector<MyType, U4>| {
-            OVector::<MyType, U2>::new(state.x * state.x * state.x, state.x * state.y)
+            Vector2::<MyType>::new(state.x * state.x * state.x, state.x * state.y)
         };
 
         // Create Jacobian of the observation model. We only observe the position.
         #[rustfmt::skip]
-        let observation_matrix = OMatrix::<MyType, U2, U4>::new(
+        let observation_matrix = Matrix2x4::<MyType>::new(
             3.0 * state.x * state.x, 0.0, 0.0, 0.0,
             state.y, state.x, 0.0, 0.0,
         );
         let observation_matrix_transpose = observation_matrix.transpose();
-        let observation_noise_covariance = OMatrix::<MyType, U2, U2>::new(0.01, 0.0, 0.0, 0.01);
+        let observation_noise_covariance = Matrix2::<MyType>::new(0.01, 0.0, 0.0, 0.01);
 
         LinearizedObservationModel {
             evaluation_func: Box::new(evaluation_func),
@@ -48,7 +51,7 @@ impl NonlinearObservationModel {
     }
 }
 
-type EvaluationFn = Box<dyn Fn(&OVector<MyType, U4>) -> OVector<MyType, U2>>;
+type EvaluationFn = Box<dyn Fn(&Vector4<MyType>) -> Vector2<MyType>>;
 
 struct LinearizedObservationModel
 where
@@ -59,9 +62,9 @@ where
     DefaultAllocator: Allocator<MyType, U4>,
 {
     evaluation_func: EvaluationFn,
-    observation_matrix: OMatrix<MyType, U2, U4>,
-    observation_matrix_transpose: OMatrix<MyType, U4, U2>,
-    observation_noise_covariance: OMatrix<MyType, U2, U2>,
+    observation_matrix: Matrix2x4<MyType>,
+    observation_matrix_transpose: Matrix4x2<MyType>,
+    observation_noise_covariance: Matrix2<MyType>,
 }
 
 impl ObservationModel<MyType, U4, U2> for LinearizedObservationModel
@@ -75,16 +78,16 @@ where
     DefaultAllocator: Allocator<(usize, usize), U2>,
     U2: DimMin<U2, Output = U2>,
 {
-    fn H(&self) -> &OMatrix<MyType, U2, U4> {
+    fn H(&self) -> &Matrix2x4<MyType> {
         &self.observation_matrix
     }
-    fn HT(&self) -> &OMatrix<MyType, U4, U2> {
+    fn HT(&self) -> &Matrix4x2<MyType> {
         &self.observation_matrix_transpose
     }
-    fn R(&self) -> &OMatrix<MyType, U2, U2> {
+    fn R(&self) -> &Matrix2<MyType> {
         &self.observation_noise_covariance
     }
-    fn predict_observation(&self, state: &OVector<MyType, U4>) -> OVector<MyType, U2> {
+    fn predict_observation(&self, state: &Vector4<MyType>) -> Vector2<MyType> {
         (*self.evaluation_func)(state)
     }
 }
@@ -95,9 +98,9 @@ fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
 
     let dt = 0.01;
-    let true_initial_state = OVector::<MyType, U4>::new(0.0, 0.0, 10.0, -5.0);
+    let true_initial_state = Vector4::<MyType>::new(0.0, 0.0, 10.0, -5.0);
     #[rustfmt::skip]
-    let initial_covariance = OMatrix::<MyType, U4, U4>::new(
+    let initial_covariance = Matrix4::<MyType>::new(
         0.1, 0.0, 0.0, 0.0,
         0.0, 0.1, 0.0, 0.0,
         0.0, 0.0, 0.1, 0.0,
@@ -116,7 +119,7 @@ fn main() -> Result<(), anyhow::Error> {
     while cur_time < 0.5 {
         times.push(cur_time);
         state.push(current_state);
-        let noise_sample: OMatrix<MyType, U1, U4> =
+        let noise_sample: Matrix1x4<MyType> =
             rand_mvn(&zero4, motion_model.transition_noise_covariance).unwrap();
         let noise_sample_col: OVector<MyType, U4> = noise_sample.transpose();
         current_state = motion_model.transition_model * current_state + noise_sample_col;
@@ -127,8 +130,8 @@ fn main() -> Result<(), anyhow::Error> {
     let mut observation = vec![];
     let zero2 = Vector2::<MyType>::zeros();
     for current_state in state.iter() {
-        let observation_model = observation_model_gen.linearize_at(&current_state);
-        let noise_sample: OMatrix<MyType, U1, U2> =
+        let observation_model = observation_model_gen.linearize_at(current_state);
+        let noise_sample: Matrix1x2<MyType> =
             rand_mvn(&zero2, observation_model.observation_noise_covariance).unwrap();
         let noise_sample_col = noise_sample.transpose();
         let current_observation =
@@ -141,7 +144,7 @@ fn main() -> Result<(), anyhow::Error> {
 
     let mut state_estimates = vec![];
     for this_observation in observation.iter() {
-        let observation_model = observation_model_gen.linearize_at(&previous_estimate.state());
+        let observation_model = observation_model_gen.linearize_at(previous_estimate.state());
         let kf = KalmanFilterNoControl::new(&motion_model, &observation_model);
 
         let this_estimate = kf.step(&previous_estimate, this_observation)?;

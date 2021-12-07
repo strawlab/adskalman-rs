@@ -1,6 +1,4 @@
-use na::dimension::{U1, U2, U4};
-use na::{OMatrix, OVector, Vector2, Vector4};
-use nalgebra as na;
+use nalgebra::{Matrix1x2, Matrix1x4, Matrix4, Vector2, Vector4};
 use nalgebra_rand_mvn::rand_mvn;
 
 use adskalman::{KalmanFilterNoControl, ObservationModel};
@@ -17,9 +15,9 @@ fn main() -> Result<(), anyhow::Error> {
     env_logger::init();
 
     let dt = 0.01;
-    let true_initial_state = OVector::<MyType, U4>::new(0.0, 0.0, 10.0, -5.0);
+    let true_initial_state = Vector4::<MyType>::new(0.0, 0.0, 10.0, -5.0);
     #[rustfmt::skip]
-    let initial_covariance = OMatrix::<MyType,U4,U4>::new(0.1, 0.0, 0.0, 0.0,
+    let initial_covariance = Matrix4::<MyType>::new(0.1, 0.0, 0.0, 0.0,
         0.0, 0.1, 0.0, 0.0,
         0.0, 0.0, 0.1, 0.0,
         0.0, 0.0, 0.0, 0.1);
@@ -37,9 +35,9 @@ fn main() -> Result<(), anyhow::Error> {
     while cur_time < 0.5 {
         times.push(cur_time);
         state.push(current_state);
-        let noise_sample: OMatrix<MyType, U1, U4> =
+        let noise_sample: Matrix1x4<MyType> =
             rand_mvn(&zero4, motion_model.transition_noise_covariance).unwrap();
-        let noise_sample_col: OVector<MyType, U4> = noise_sample.transpose();
+        let noise_sample_col: Vector4<MyType> = noise_sample.transpose();
         current_state = motion_model.transition_model * current_state + noise_sample_col;
         cur_time += dt;
     }
@@ -48,7 +46,7 @@ fn main() -> Result<(), anyhow::Error> {
     let mut observation = vec![];
     let zero2 = Vector2::<MyType>::zeros();
     for current_state in state.iter() {
-        let noise_sample: OMatrix<MyType, U1, U2> =
+        let noise_sample: Matrix1x2<MyType> =
             rand_mvn(&zero2, observation_model.observation_noise_covariance).unwrap();
         let noise_sample_col = noise_sample.transpose();
         let current_observation =
