@@ -36,10 +36,9 @@ where
         // the eigenvalues could be computed and used to test semi-definiteness
         // (e.g. https://scicomp.stackexchange.com/questions/12979).
         //
-        // I have decided that the computational cost cost is not worth the
-        // marginal benefits such testing would bring. If your covariance
-        // matrices might not be symmetric and positive semi-definite, test them
-        // prior to this.
+        // I have decided that the computational cost is not worth the marginal
+        // benefits such testing would bring. If your covariance matrices might
+        // not be symmetric and positive semi-definite, test them prior to this.
         Self { state, covariance }
     }
     #[inline]
