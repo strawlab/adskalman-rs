@@ -317,7 +317,15 @@ pub enum CovarianceUpdateMethod {
     JosephForm,
 }
 
-/// A Kalman filter with no control inputs, a linear process model and linear observation model
+/// A Kalman filter with no control inputs, a linear process model and linear
+/// observation model
+///
+/// Note that the structure is cheap to create, storing only references to the
+/// state transition model and the observation model. (The system state is
+/// passed as an argument to methods like [Self::step].) Given the lifetime
+/// bound of this struct, a useful strategy to avoid requiring lifetime
+/// annotations is to construct it just before [Self::step] and then dropping it
+/// immediately afterward.
 pub struct KalmanFilterNoControl<'a, R, SS, OS>
 where
     R: RealField,
