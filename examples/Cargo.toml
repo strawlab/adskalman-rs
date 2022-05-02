@@ -6,7 +6,7 @@ authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
 
 [dependencies]
-nalgebra = "0.30"
+nalgebra = "0.31"
 adskalman = {path=".."}
 nalgebra-rand-mvn = {git="https://github.com/strawlab/nalgebra-rand-mvn", rev="90edbfeaa93d6daffdeea8e56143f9d7dae1d2ad"}
 env_logger = "0.9"
