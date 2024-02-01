@@ -22,9 +22,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(non_snake_case)]
-
-#[cfg(debug_assertions)]
-use approx::assert_relative_eq;
 #[cfg(feature = "std")]
 use log::trace;
 use na::{OMatrix, OVector};
@@ -50,7 +47,9 @@ macro_rules! debug_assert_symmetric {
     ($mat:expr) => {
         #[cfg(debug_assertions)]
         {
-            assert_relative_eq!($mat, &$mat.transpose(), max_relative = na::convert(1e-5));
+            if approx::relative_ne!($mat, &$mat.transpose(), max_relative = na::convert(1e-5)) {
+                return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
+            }
         }
     };
 }
