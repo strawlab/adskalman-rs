@@ -175,7 +175,7 @@ fn check_covariance_update_method(covariance_update_method: &CovarianceUpdateMet
     let maxerr = 1e-8;
 
     let rdr = csv::Reader::from_reader(TRACKING_DATA.as_bytes());
-    for row in rdr.into_deserialize().into_iter() {
+    for row in rdr.into_deserialize() {
         let row: CsvRow = row.unwrap();
         println!("{:?}", row);
         let this_observation = OVector::<f64, Const<2>>::new(row.obs_x, row.obs_y);
@@ -229,7 +229,7 @@ fn test_offline_smoothing() {
     let mut expected = vec![];
 
     let rdr = csv::Reader::from_reader(SMOOTHED_DATA.as_bytes());
-    for row in rdr.into_deserialize().into_iter() {
+    for row in rdr.into_deserialize() {
         let row: CsvRow = row.unwrap();
 
         println!("{:?}", row);
@@ -274,7 +274,7 @@ fn test_offline_smoothing_with_missing_data() {
     let mut expected = vec![];
 
     let rdr = csv::Reader::from_reader(SMOOTHED_DATA.as_bytes());
-    for row in rdr.into_deserialize().into_iter() {
+    for row in rdr.into_deserialize() {
         let row: CsvRow = row.unwrap();
 
         println!("{:?}", row);
