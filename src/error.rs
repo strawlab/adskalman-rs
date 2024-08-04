@@ -1,22 +1,15 @@
-/// An error
+/// An Kalman filter error
 #[derive(Debug)]
-pub struct Error {
-    kind: ErrorKind,
-}
-
-/// The kinds of errors
-#[derive(Debug)]
-pub enum ErrorKind {
+pub enum Error {
     /// The covariance matrix is not positive semi-definite (or is not symmetric).
     CovarianceNotPositiveSemiDefinite,
 }
 
 #[cfg(feature = "std")]
-impl std::fmt::Display for ErrorKind {
+impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        use ErrorKind::*;
         let s = match self {
-            CovarianceNotPositiveSemiDefinite => {
+            Self::CovarianceNotPositiveSemiDefinite => {
                 "The covariance matrix is not positive semi-definite (or is not symmetric)"
             }
         };
@@ -24,17 +17,5 @@ impl std::fmt::Display for ErrorKind {
     }
 }
 
-impl From<ErrorKind> for Error {
-    fn from(kind: ErrorKind) -> Error {
-        Error { kind }
-    }
-}
-
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
-#[cfg(feature = "std")]
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Kalman Filter Error: {}", self.kind)
-    }
-}

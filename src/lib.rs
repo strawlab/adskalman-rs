@@ -48,7 +48,7 @@ macro_rules! debug_assert_symmetric {
         #[cfg(debug_assertions)]
         {
             if approx::relative_ne!($mat, &$mat.transpose(), max_relative = na::convert(1e-5)) {
-                return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
+                return Err(Error::CovarianceNotPositiveSemiDefinite);
             }
         }
     };
@@ -75,7 +75,7 @@ macro_rules! pretty_print {
 }
 
 mod error;
-pub use error::{Error, ErrorKind};
+pub use error::Error;
 
 mod state_and_covariance;
 pub use state_and_covariance::StateAndCovariance;
@@ -197,7 +197,7 @@ where
                 // Maybe state covariance is not symmetric or
                 // for from positive definite? Also, observation
                 // noise should be positive definite.
-                return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
+                return Err(Error::CovarianceNotPositiveSemiDefinite);
             }
         };
         let s_inv: Matrix<R, OS, OS, _> = s_chol.inverse();
@@ -469,7 +469,7 @@ where
         let v_chol = match na::linalg::Cholesky::new(prior.covariance().clone()) {
             Some(v) => v,
             None => {
-                return Err(ErrorKind::CovarianceNotPositiveSemiDefinite.into());
+                return Err(Error::CovarianceNotPositiveSemiDefinite);
             }
         };
         let inv_prior_covariance: Matrix<R, SS, SS, _> = v_chol.inverse();
