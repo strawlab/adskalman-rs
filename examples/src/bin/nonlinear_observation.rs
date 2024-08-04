@@ -1,11 +1,7 @@
 use nalgebra as na;
 
 use na::{
-    allocator::Allocator,
-    dimension::DimMin,
-    dimension::{U2, U4},
-    DefaultAllocator, Matrix1x2, Matrix1x4, Matrix2, Matrix2x4, Matrix4, Matrix4x2, OVector,
-    Vector2, Vector4,
+    Matrix1x2, Matrix1x4, Matrix2, Matrix2x4, Matrix4, Matrix4x2, OVector, Vector2, Vector4, U2, U4,
 };
 use nalgebra_rand_mvn::rand_mvn;
 
@@ -53,31 +49,14 @@ impl NonlinearObservationModel {
 
 type EvaluationFn = Box<dyn Fn(&Vector4<MyType>) -> Vector2<MyType>>;
 
-struct LinearizedObservationModel
-where
-    DefaultAllocator: Allocator<MyType, U4, U4>,
-    DefaultAllocator: Allocator<MyType, U2, U4>,
-    DefaultAllocator: Allocator<MyType, U4, U2>,
-    DefaultAllocator: Allocator<MyType, U2, U2>,
-    DefaultAllocator: Allocator<MyType, U4>,
-{
+struct LinearizedObservationModel {
     evaluation_func: EvaluationFn,
     observation_matrix: Matrix2x4<MyType>,
     observation_matrix_transpose: Matrix4x2<MyType>,
     observation_noise_covariance: Matrix2<MyType>,
 }
 
-impl ObservationModel<MyType, U4, U2> for LinearizedObservationModel
-where
-    DefaultAllocator: Allocator<MyType, U4, U4>,
-    DefaultAllocator: Allocator<MyType, U2, U4>,
-    DefaultAllocator: Allocator<MyType, U4, U2>,
-    DefaultAllocator: Allocator<MyType, U2, U2>,
-    DefaultAllocator: Allocator<MyType, U4>,
-    DefaultAllocator: Allocator<MyType, U2>,
-    DefaultAllocator: Allocator<(usize, usize), U2>,
-    U2: DimMin<U2, Output = U2>,
-{
+impl ObservationModel<MyType, U4, U2> for LinearizedObservationModel {
     fn H(&self) -> &Matrix2x4<MyType> {
         &self.observation_matrix
     }

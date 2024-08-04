@@ -13,8 +13,8 @@ use adskalman::TransitionModelLinearNoControl;
 pub struct ConstantVelocity2DModel<R>
 where
     R: RealField,
-    DefaultAllocator: Allocator<R, U4, U4>,
-    DefaultAllocator: Allocator<R, U4>,
+    DefaultAllocator: Allocator<U4, U4>,
+    DefaultAllocator: Allocator<U4>,
 {
     pub transition_model: OMatrix<R, U4, U4>,
     pub transition_model_transpose: OMatrix<R, U4, U4>,
@@ -60,11 +60,11 @@ where
 impl<R> TransitionModelLinearNoControl<R, U4> for ConstantVelocity2DModel<R>
 where
     R: RealField,
-    DefaultAllocator: Allocator<R, U4, U4>,
-    DefaultAllocator: Allocator<R, U2, U4>,
-    DefaultAllocator: Allocator<R, U4, U2>,
-    DefaultAllocator: Allocator<R, U2, U2>,
-    DefaultAllocator: Allocator<R, U4>,
+    DefaultAllocator: Allocator<U4, U4>,
+    DefaultAllocator: Allocator<U2, U4>,
+    DefaultAllocator: Allocator<U4, U2>,
+    DefaultAllocator: Allocator<U2, U2>,
+    DefaultAllocator: Allocator<U4>,
 {
     fn F(&self) -> &OMatrix<R, U4, U4> {
         &self.transition_model

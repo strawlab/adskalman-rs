@@ -6,9 +6,9 @@ authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
 
 [dependencies]
-nalgebra = "0.32"
-adskalman = {path=".."}
-nalgebra-rand-mvn = {git="https://github.com/strawlab/nalgebra-rand-mvn", rev="40dd19c5967b24389452aa8c540f643b10fe4e34"}
+nalgebra = { workspace = true }
+adskalman = { path = ".." }
+nalgebra-rand-mvn = { git = "https://github.com/strawlab/nalgebra-rand-mvn", rev = "f3ff033ec63e6cfc1a92dcad4d8fb8083e9d4baa" }
 env_logger = "0.11"
 log = { version = "0.4", features = ["release_max_level_debug"] }
 anyhow = "1.0"

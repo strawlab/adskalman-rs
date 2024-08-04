@@ -37,8 +37,8 @@ struct CsvRow {
 struct ConstantVelocity2DModel<R>
 where
     R: RealField,
-    DefaultAllocator: Allocator<R, U4, U4>,
-    DefaultAllocator: Allocator<R, U4>,
+    DefaultAllocator: Allocator<U4, U4>,
+    DefaultAllocator: Allocator<U4>,
 {
     transition_model: OMatrix<R, U4, U4>,
     transition_model_transpose: OMatrix<R, U4, U4>,
@@ -83,11 +83,11 @@ where
 impl<R> TransitionModelLinearNoControl<R, U4> for ConstantVelocity2DModel<R>
 where
     R: RealField,
-    DefaultAllocator: Allocator<R, U4, U4>,
-    DefaultAllocator: Allocator<R, U2, U4>,
-    DefaultAllocator: Allocator<R, U4, U2>,
-    DefaultAllocator: Allocator<R, U2, U2>,
-    DefaultAllocator: Allocator<R, U4>,
+    DefaultAllocator: Allocator<U4, U4>,
+    DefaultAllocator: Allocator<U2, U4>,
+    DefaultAllocator: Allocator<U4, U2>,
+    DefaultAllocator: Allocator<U2, U2>,
+    DefaultAllocator: Allocator<U4>,
 {
     fn F(&self) -> &OMatrix<R, U4, U4> {
         &self.transition_model
@@ -104,11 +104,11 @@ where
 
 struct PositionObservationModel<R: RealField>
 where
-    DefaultAllocator: Allocator<R, U4, U4>,
-    DefaultAllocator: Allocator<R, U2, U4>,
-    DefaultAllocator: Allocator<R, U4, U2>,
-    DefaultAllocator: Allocator<R, U2, U2>,
-    DefaultAllocator: Allocator<R, U4>,
+    DefaultAllocator: Allocator<U4, U4>,
+    DefaultAllocator: Allocator<U2, U4>,
+    DefaultAllocator: Allocator<U4, U2>,
+    DefaultAllocator: Allocator<U2, U2>,
+    DefaultAllocator: Allocator<U4>,
 {
     observation_matrix: OMatrix<R, U2, U4>,
     observation_matrix_transpose: OMatrix<R, U4, U2>,
@@ -136,13 +136,13 @@ impl<R: RealField + Copy> PositionObservationModel<R> {
 
 impl<R: RealField> ObservationModel<R, U4, U2> for PositionObservationModel<R>
 where
-    DefaultAllocator: Allocator<R, U4, U4>,
-    DefaultAllocator: Allocator<R, U2, U4>,
-    DefaultAllocator: Allocator<R, U4, U2>,
-    DefaultAllocator: Allocator<R, U2, U2>,
-    DefaultAllocator: Allocator<R, U4>,
-    DefaultAllocator: Allocator<R, U2>,
-    DefaultAllocator: Allocator<(usize, usize), U2>,
+    DefaultAllocator: Allocator<U4, U4>,
+    DefaultAllocator: Allocator<U2, U4>,
+    DefaultAllocator: Allocator<U4, U2>,
+    DefaultAllocator: Allocator<U2, U2>,
+    DefaultAllocator: Allocator<U4>,
+    DefaultAllocator: Allocator<U2>,
+    DefaultAllocator: Allocator< U2>,
     U2: DimMin<U2, Output = U2>,
 {
     fn H(&self) -> &OMatrix<R, U2, U4> {

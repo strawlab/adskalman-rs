@@ -11,10 +11,13 @@ keywords = ["kalman", "bayesian"]
 categories = ["algorithms", "no-std", "science", "science::robotics"]
 
 [dependencies]
-nalgebra = { version = "0.32", default-features = false, features = ["libm"] }
+nalgebra = { workspace = true, features = ["libm"] }
 num-traits = { version = "0.2", default-features = false }
 log = { version = "0.4", optional = true }
 approx = { version = "0.5", default-features = false }
+
+[workspace.dependencies]
+nalgebra = { version = "0.33", default-features = false }
 
 [dev-dependencies]
 csv = "1.1"
