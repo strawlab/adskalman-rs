@@ -1,5 +1,6 @@
 use nalgebra::{
-    allocator::Allocator, base::storage::Owned, DefaultAllocator, Dim, Matrix, RealField, Vector,
+    allocator::Allocator, base::storage::Owned, DefaultAllocator, Dim, Matrix, OMatrix, OVector,
+    RealField, Vector,
 };
 
 /// State and covariance pair for a given estimate
@@ -63,12 +64,7 @@ where
     }
     /// Get the state vector and covariance matrix.
     #[inline]
-    pub fn inner(
-        self,
-    ) -> (
-        Vector<R, SS, Owned<R, SS>>,
-        Matrix<R, SS, SS, Owned<R, SS, SS>>,
-    ) {
+    pub fn inner(self) -> (OVector<R, SS>, OMatrix<R, SS, SS>) {
         (self.state, self.covariance)
     }
 }

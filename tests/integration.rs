@@ -177,7 +177,7 @@ fn check_covariance_update_method(covariance_update_method: &CovarianceUpdateMet
     let rdr = csv::Reader::from_reader(TRACKING_DATA.as_bytes());
     for row in rdr.into_deserialize() {
         let row: CsvRow = row.unwrap();
-        println!("{:?}", row);
+        println!("{row:?}");
         let this_observation = OVector::<f64, Const<2>>::new(row.obs_x, row.obs_y);
         let this_estimate = kf
             .step_with_options(
@@ -188,7 +188,7 @@ fn check_covariance_update_method(covariance_update_method: &CovarianceUpdateMet
             .unwrap();
 
         let this_state = this_estimate.state();
-        println!("  -> {:?}\n\n", this_state);
+        println!("  -> {this_state:?}\n\n");
 
         assert_relative_eq!(this_state[0], row.est_x, max_relative = maxerr);
         assert_relative_eq!(this_state[1], row.est_y, max_relative = maxerr);
@@ -232,7 +232,7 @@ fn test_offline_smoothing() {
     for row in rdr.into_deserialize() {
         let row: CsvRow = row.unwrap();
 
-        println!("{:?}", row);
+        println!("{row:?}");
         let this_observation = OVector::<f64, Const<2>>::new(row.obs_x, row.obs_y);
         observation.push(this_observation);
         expected.push(OVector::<f64, Const<4>>::new(
@@ -277,7 +277,7 @@ fn test_offline_smoothing_with_missing_data() {
     for row in rdr.into_deserialize() {
         let row: CsvRow = row.unwrap();
 
-        println!("{:?}", row);
+        println!("{row:?}");
         let this_observation = OVector::<f64, Const<2>>::new(row.obs_x, row.obs_y);
         observation.push(this_observation);
         expected.push(OVector::<f64, Const<4>>::new(

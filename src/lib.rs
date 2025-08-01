@@ -417,7 +417,7 @@ where
     /// and returns a vector of state estimates. To be mathematically correct,
     /// the interval between observations must be the `dt` specified in the
     /// motion model.
-
+    ///
     /// Operates on entire time series in one shot and returns a vector of state
     /// estimates. To be mathematically correct, the interval between
     /// observations must be the `dt` specified in the motion model.
@@ -500,17 +500,17 @@ fn is_nan<R: RealField>(x: R) -> bool {
 
 #[test]
 fn test_is_nan() {
-    assert_eq!(is_nan::<f64>(-1.0), false);
-    assert_eq!(is_nan::<f64>(0.0), false);
-    assert_eq!(is_nan::<f64>(1.0), false);
-    assert_eq!(is_nan::<f64>(1.0 / 0.0), false);
-    assert_eq!(is_nan::<f64>(-1.0 / 0.0), false);
-    assert_eq!(is_nan::<f64>(std::f64::NAN), true);
+    assert!(!is_nan::<f64>(-1.0));
+    assert!(!is_nan::<f64>(0.0));
+    assert!(!is_nan::<f64>(1.0));
+    assert!(!is_nan::<f64>(1.0 / 0.0));
+    assert!(!is_nan::<f64>(-1.0 / 0.0));
+    assert!(is_nan::<f64>(std::f64::NAN));
 
-    assert_eq!(is_nan::<f32>(-1.0), false);
-    assert_eq!(is_nan::<f32>(0.0), false);
-    assert_eq!(is_nan::<f32>(1.0), false);
-    assert_eq!(is_nan::<f32>(1.0 / 0.0), false);
-    assert_eq!(is_nan::<f32>(-1.0 / 0.0), false);
-    assert_eq!(is_nan::<f32>(std::f32::NAN), true);
+    assert!(!is_nan::<f32>(-1.0));
+    assert!(!is_nan::<f32>(0.0));
+    assert!(!is_nan::<f32>(1.0));
+    assert!(!is_nan::<f32>(1.0 / 0.0));
+    assert!(!is_nan::<f32>(-1.0 / 0.0));
+    assert!(is_nan::<f32>(std::f32::NAN));
 }
