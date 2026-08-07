@@ -5,10 +5,11 @@ version = "0.17.0"
 authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
 description = "Kalman filter and Rauch-Tung-Striebel smoothing implementation using nalgebra, no_std"
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["kalman", "bayesian"]
 categories = ["algorithms", "no-std", "science", "science::robotics"]
+rust-version = "1.89"
 
 [dependencies]
 nalgebra = { workspace = true, features = ["libm"] }
@@ -17,7 +18,7 @@ log = { version = "0.4", optional = true }
 approx = { version = "0.5", default-features = false }
 
 [workspace.dependencies]
-nalgebra = { version = "0.34", default-features = false }
+nalgebra = { version = "0.35", default-features = false }
 
 [dev-dependencies]
 csv = "1.1"

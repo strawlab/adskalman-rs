@@ -505,12 +505,12 @@ fn test_is_nan() {
     assert!(!is_nan::<f64>(1.0));
     assert!(!is_nan::<f64>(1.0 / 0.0));
     assert!(!is_nan::<f64>(-1.0 / 0.0));
-    assert!(is_nan::<f64>(std::f64::NAN));
+    assert!(is_nan::<f64>(f64::NAN));
 
     assert!(!is_nan::<f32>(-1.0));
     assert!(!is_nan::<f32>(0.0));
     assert!(!is_nan::<f32>(1.0));
     assert!(!is_nan::<f32>(1.0 / 0.0));
     assert!(!is_nan::<f32>(-1.0 / 0.0));
-    assert!(is_nan::<f32>(std::f32::NAN));
+    assert!(is_nan::<f32>(f32::NAN));
 }

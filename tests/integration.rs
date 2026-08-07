@@ -142,7 +142,7 @@ where
     DefaultAllocator: Allocator<U2, U2>,
     DefaultAllocator: Allocator<U4>,
     DefaultAllocator: Allocator<U2>,
-    DefaultAllocator: Allocator< U2>,
+    DefaultAllocator: Allocator<U2>,
     U2: DimMin<U2, Output = U2>,
 {
     fn H(&self) -> &OMatrix<R, U2, U4> {
@@ -289,8 +289,8 @@ fn test_offline_smoothing_with_missing_data() {
     }
 
     assert_eq!(observation.len(), 50);
-    for i in 25..30 {
-        observation[i] = OVector::<f64, Const<2>>::new(std::f64::NAN, std::f64::NAN);
+    for item in observation.iter_mut().take(30).skip(25) {
+        *item = OVector::<f64, Const<2>>::new(f64::NAN, f64::NAN);
     }
 
     let initial_estimate =

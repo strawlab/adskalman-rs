@@ -2,13 +2,15 @@
 name = "adskalman-examples"
 description = "Examples for the adskalman crate"
 version = "0.1.0"
+publish = false
 authors = ["Andrew Straw <strawman@astraw.com>"]
 edition = "2018"
+rust-version = "1.89"
 
 [dependencies]
 nalgebra = { workspace = true }
 adskalman = { path = ".." }
-nalgebra-rand-mvn = "0.2.0"
+nalgebra-rand-mvn = "0.3.1"
 env_logger = "0.11"
 log = { version = "0.4", features = ["release_max_level_debug"] }
 anyhow = "1.0"
