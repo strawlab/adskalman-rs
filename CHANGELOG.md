@@ -1,3 +1,14 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.17.0] - 2025-08-01
+
+[0.17.0]: https://github.com/strawlab/adskalman-rs/releases/tag/0.17.0
+
 # 0.10.0 (June 4, 2021)
 
 The `nalgebra` and `approx` crates have been updated to their latest versions.

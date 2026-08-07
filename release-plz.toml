@@ -1,0 +1,52 @@
+[workspace]
+# Publish only after the release PR is merged, not after every push to main.
+release_always = false
+repo_url = "https://github.com/strawlab/adskalman-rs"
+git_tag_name = "{{ version }}"
+pr_name = "chore(release): release {{ package }} {{ version }}"
+release_commits = '(?m)^(feat|fix|perf|refactor|docs|chore\(deps\))[(:!]|^BREAKING[ -]CHANGE:'
+semver_check = true
+
+[[package]]
+name = "adskalman-examples"
+release = false
+
+[changelog]
+header = """# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+"""
+body = """
+## [{{ version }}]{%- if release_link %}({{ release_link }}){% endif %} - {{ timestamp | date(format="%Y-%m-%d") }}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+{%- if commit.scope -%}
+- *({{ commit.scope }})* {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message }}{%- if commit.links %} ({% for link in commit.links %}[{{ link.text }}]({{ link.href }}){% if not loop.last %}, {% endif %}{% endfor %}){% endif %}
+{% else -%}
+- {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message }}
+{% endif -%}
+{% endfor -%}
+{% endfor %}
+"""
+trim = true
+protect_breaking_commits = true
+sort_commits = "oldest"
+commit_preprocessors = [
+    { pattern = ' \(Codex GPT-5\)', replace = "" },
+    { pattern = '\(#([0-9]+)\)', replace = '([#${1}](https://github.com/strawlab/adskalman-rs/pull/${1}))' },
+]
+commit_parsers = [
+    { message = "^feat", group = "Added" },
+    { message = "^fix", group = "Fixed" },
+    { message = "^perf", group = "Performance" },
+    { message = "^refactor", group = "Changed" },
+    { message = "^docs?", group = "Documentation" },
+    { message = '^chore\(deps\)', group = "Dependencies" },
+    { message = "^(build|ci|chore|style|test)", skip = true },
+    { message = ".*", group = "Other" },
+]
