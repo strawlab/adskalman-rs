@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.18.0](https://github.com/strawlab/adskalman-rs/compare/0.17.0...0.18.0) - 2026-08-07
+
+### Added
+- *(deps)* [**breaking**] update nalgebra to 0.35
+
+### Fixed
+- *(release)* align examples publishing config
+
 ## [0.17.0] - 2025-08-01
 
 [0.17.0]: https://github.com/strawlab/adskalman-rs/releases/tag/0.17.0
