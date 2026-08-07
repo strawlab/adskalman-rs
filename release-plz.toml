@@ -10,6 +10,7 @@ semver_check = true
 [[package]]
 name = "adskalman-examples"
 release = false
+publish = false
 
 [changelog]
 header = """# Changelog
